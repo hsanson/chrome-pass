@@ -1,0 +1,44 @@
+select {
+    border: 1px solid #CCC;
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 4px 4px;
+    width: 350px;
+    background: transparent;
+}
+
+optgroup {
+  font-family: "Helvetica Neue",Helvetica,arial,sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #959595;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+option {
+  color: #000;
+  font-size: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+.title {
+  font-family: "Helvetica Neue",Helvetica,arial,sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #959595;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.error {
+  font-family: "Helvetica Neue",Helvetica,arial,sans-serif;
+  font-size: 12px;
+  font-weight: 200;
+  color: #991010;
+  letter-spacing: 1px;
+}

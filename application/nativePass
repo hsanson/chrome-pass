@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+# Requires python-gpg library
+import os
+import sys
+import json
+import gnupg
+import struct
+import difflib
+from urllib.parse import urlparse
+
+STORE_PATH = os.environ['HOME'] + "/.password-store"
+
+# Returns a similarity score between two strings.
+def similarity(pattern1, pattern2):
+    return difflib.SequenceMatcher(a=pattern1.lower(), b=pattern2.lower()).ratio()
+
+# Returns the similarity score of a credential to a pattern. This method is used
+# as sort key for sorting the credential list based on similarity to the search
+# pattern.
+def sort_key(credential):
+    score = similarity(credential[1], credential[3])
+    return score
+
+# Returns a list of credentials ordered by similarity to the pattern argument.
+# The list is a list of lists with the format:
+# 
+#  [ 
+#    [ "store path", "url", "username", "pattern" ],
+#    [ "store path", "url", "username", "pattern" ],
+#    [ "store path", "url", "username", "pattern" ],
+#    .....
+#  ]
+def get_list(pattern):
+  credentials = []
+  for root, dirs, files in os.walk(STORE_PATH):
+      if len(files) > 0:
+        for f in files:
+          if f.endswith(".gpg"):
+            cred_path = root.replace(STORE_PATH, "")
+            cred_url = os.path.basename(os.path.normpath(cred_path))
+            cred_user = f.replace(".gpg", "")
+            credentials.append([cred_path, cred_url, cred_user, pattern])
+
+  return sorted(credentials, key = sort_key, reverse = True)
+
+# Returns the pass password for the specified path. The path must corresponde to
+# a unique existing gpg file inside the password store.
+def get_pass(path):
+  password = ""
+  gpg = gnupg.GPG()
+  txt = open(STORE_PATH + "/" + path + ".gpg", "rb")
+  data = gpg.decrypt_file(txt)
+  if data.status == "decryption ok":
+    password = data.data.decode('utf-8').split("\n")[0]
+
+  return password
+
+# Sends the response message with the format that chrome HostNativeApplications expect.
+def send_message(message):
+  response = json.dumps(message).encode('utf-8')
+  sys.stdout.buffer.write(struct.pack('I', len(response)))
+  sys.stdout.buffer.write(response)
+  sys.stdout.buffer.flush()
+
+# Method that implements Chrome Native App protocol for messaging.
+def process_native():
+  size = sys.stdin.buffer.read(4)
+
+  if not size:
+    send_message({ "action": "error", "msg": "no data" })
+    exit
+
+  try:
+    length = struct.unpack('I', size)[0]
+    data = sys.stdin.buffer.read(length)
+    request = json.loads(data.decode('utf-8'))
+    action = request["action"]
+    if action == "get-creds":
+      pattern = urlparse(request["url"]).netloc
+      send_message({ "action": "fill-creds", "credentials": get_list(pattern), "url": pattern })
+    elif action == "get-pass":
+      user = request["user"]
+      path = request["path"]
+      send_message({ "action": "fill-pass", "user": user, "pass": get_pass(path) })
+  except Exception:
+    send_message({ "action": "error", "msg": sys.exc_info()[0] })
+
+# Method prints to stdout the list of credentials ordered by a similarity to
+# pattern.
+def print_creds(pattern):
+ for credential in get_list(pattern):
+   score = similarity(credential[1], pattern)
+   print("compare %s and %s score %.4f" % (credential[1], credential[3], score))
+
+if len(sys.argv) > 1:
+  if sys.argv[1].startswith('chrome-extension://'):
+    process_native()
+  else:
+    print_creds(sys.argv[1])
+
