@@ -52,3 +52,26 @@ password in the login form.
  a passphrase.
  3. Only works on Ubuntu/Debian linux. May work on OSX but it is not tested.
 
+# Known Issues
+
+If the extension shows an error message indicating that no communication is possible with the native application it is possible that the
+pip installation of the native application wrapper did not go well. You may be able to fix this following these steps:
+
+First find the absolute path to the nativePass script:
+
+    which nativePass
+
+if the above command does not return anything it means your pip3 tool is installing binary scripts in a path that is not part of your system
+PATH. Try to find where the nativePass script is by other means such as *find* command tool.
+
+Once you have the full path for the nativePass script (e.g. \$HOME/.local/bin/nativePass) try to locate and edit the native messaging host
+manifest file. This is usually located at:
+
+    $HOME/.config/google-chrome/NativeMessagingHosts/com.piaotech.chrome.extension.pass.json
+
+Inside the file check that the *path* variable is set to the absolute path location of the nativePass script above.
+
+Also it would be a good time to verify that the *allowed_origins* variable is set correctly. For this open the URL *chrome://extensions*
+inside Chrome and look for the chrome-pass extension *ID*. It should look something like *oblajhnjmknenodebpekmkliopipoolo* and ensure it
+matches the *allowed_origins* URI.
+

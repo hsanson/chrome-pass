@@ -19,16 +19,15 @@ function getPass(root, url, user, tabId) {
   chrome.runtime.sendNativeMessage('com.piaotech.chrome.extension.pass',
       { action: "get-pass", user: user, path: root + "/" + user },
       function(response) {
-        //if(response) {
-          console.log("Native app got password");
+        if(response) {
           chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
             currentTab = tabs[0];
             chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", user: user, pass: response.pass });
           });
-        //} else {
-        //  console.log("Native app returned no response");
-        //  chrome.runtime.sendMessage({ action: "native-app-error" });
-        //}
+        } else {
+          console.log("Native app returned no response");
+          chrome.runtime.sendMessage({ action: "native-app-error" });
+        }
       }
   );
 }

@@ -30,7 +30,7 @@ class install_native_app(install):
       manifest["description"] = self.distribution.metadata.description
       manifest["path"] = self.distribution.get_command_obj('install_scripts').get_outputs()[0]
       manifest["type"] = "stdio"
-      manifest["allowed_origins"] = ["chrome-extension://jnmeofhfeehfmmaeegoklelonipmmhjh/"]
+      manifest["allowed_origins"] = ["chrome-extension://oblajhnjmknenodebpekmkliopipoolo/"]
 
       if not os.path.exists(nativePath):
         os.makedirs(nativePath)
@@ -45,7 +45,7 @@ cmdclass['install'] = install_native_app
 
 setup(
   name="chrome-pass",
-  version="0.1.0",
+  version="0.1.1",
   description="Chrome Native application for pass - the standard Unix password manager",
   url="https://github.com/hsanson/chrome-pass",
   author="Horacio Sanson",

@@ -40,7 +40,6 @@ if(forms.length > 0) {
   chrome.runtime.onMessage.addListener(function(msg) {
     switch(msg.action) {
       case "fill-pass":
-        console.log("fill-pass " + msg.user);
         for(var i = 0; i < forms.length; i++) {
           forms[i].fillPass(msg.user, msg.pass);
         }

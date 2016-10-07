@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
 
       case "native-app-error":
-        console.log("Got native app error");
         var nativeError = document.getElementById("nativeError");
         nativeError.className = "error";
         break;
