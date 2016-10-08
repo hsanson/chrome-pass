@@ -8,8 +8,10 @@ import gnupg
 import struct
 import difflib
 from urllib.parse import urlparse
+from collections import OrderedDict
 
 STORE_PATH = os.environ['HOME'] + "/.password-store"
+EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
 
 # Returns a similarity score between two strings.
 def similarity(pattern1, pattern2):
@@ -93,9 +95,43 @@ def print_creds(pattern):
    score = similarity(credential[1], pattern)
    print("compare %s and %s score %.4f" % (credential[1], credential[3], score))
 
+# Installs the Native Host Application manifest for this script into Chrome.
+def install(extension_id):
+
+  nativePath = ""
+
+  if sys.platform == "darwin":
+    nativePath = os.environ['HOME'] + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/" 
+  elif sys.platform == "linux" or sys.platform == "linux2":
+    nativePath = os.environ['HOME'] + "/.config/google-chrome/NativeMessagingHosts/"
+  else:
+    sys.stderr.write("Only linux or OSX are supported")
+    sys.exit(1)
+
+  manifest = OrderedDict()
+  manifest['name'] = "com.piaotech.chrome.extension.pass"
+  manifest["description"] = "Chrome native host application for pass - the standard Unix password manager."
+  manifest["path"] = os.path.realpath(__file__)
+  manifest["type"] = "stdio"
+  manifest["allowed_origins"] = ["chrome-extension://" + extension_id + "/"]
+
+  if not os.path.exists(nativePath):
+    os.makedirs(nativePath)
+
+  outfile = os.path.join(nativePath, manifest['name'] + '.json')
+
+  with open(outfile, 'w') as file:
+    json.dump(manifest, file, indent='\t')
+
+
 if len(sys.argv) > 1:
   if sys.argv[1].startswith('chrome-extension://'):
     process_native()
+  elif sys.argv[1] == "install":
+    if len(sys.argv) > 2:
+      install(sys.argv[2])
+    else:
+      install(EXTENSION_ID)
   else:
     print_creds(sys.argv[1])
 
