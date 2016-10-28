@@ -95,18 +95,27 @@ def print_creds(pattern):
    score = similarity(credential[1], pattern)
    print("compare %s and %s score %.4f" % (credential[1], credential[3], score))
 
-# Installs the Native Host Application manifest for this script into Chrome.
-def install(extension_id):
-
-  nativePath = ""
-
+# Determines the path were the native app manifest should be installed.
+def nativePathChrome():
   if sys.platform == "darwin":
-    nativePath = os.environ['HOME'] + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/" 
+    return os.environ['HOME'] + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/"
   elif sys.platform == "linux" or sys.platform == "linux2":
-    nativePath = os.environ['HOME'] + "/.config/google-chrome/NativeMessagingHosts/"
+    return os.environ['HOME'] + "/.config/google-chrome/NativeMessagingHosts/"
   else:
     sys.stderr.write("Only linux or OSX are supported")
     sys.exit(1)
+
+def nativePathChromium():
+  if sys.platform == "darwin":
+    return os.environ['HOME'] + "/Library/Application Support/Chromium/NativeMessagingHosts/"
+  elif sys.platform == "linux" or sys.platform == "linux2":
+    return os.environ['HOME'] + "/.config/chromium/NativeMessagingHosts/"
+  else:
+    sys.stderr.write("Only linux or OSX are supported")
+    sys.exit(1)
+
+# Installs the Native Host Application manifest for this script into Chrome.
+def install(nativePath, extension_id):
 
   manifest = OrderedDict()
   manifest['name'] = "com.piaotech.chrome.extension.pass"
@@ -129,9 +138,11 @@ if len(sys.argv) > 1:
     process_native()
   elif sys.argv[1] == "install":
     if len(sys.argv) > 2:
-      install(sys.argv[2])
+      install(nativePathChrome(), sys.argv[2])
+      install(nativePathChromium(), sys.argv[2])
     else:
-      install(EXTENSION_ID)
+      install(nativePathChrome(), EXTENSION_ID)
+      install(nativePathChromium(), EXTENSION_ID)
   else:
     print_creds(sys.argv[1])
 
