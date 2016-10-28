@@ -1,6 +1,17 @@
 This repository contains a Chrome extension that integrates the [pass](https://www.passwordstore.org/) password
 manager with Chrome.
 
+There are two folders in this repository that contain:
+
+  1. extension: This is the chrome extension (javascript) that is added to Chrome or Chromium
+  browser.
+  2. application: This is a [Chrome Native
+  Application](https://developer.chrome.com/extensions/nativeMessaging#native-messaging-host-location)
+  written in python that serves as communication host between the extension and the password store.
+
+To use the extension you need to install the extension in your chrome or chromium browser and the
+python native application (nativePass).
+
 # Requirements
 
  1. Chrome version 50 or later.
@@ -12,7 +23,7 @@ manager with Chrome.
 These instructions have been tested in Ubuntu 16.04 only:
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.1.5
+    pip3 install --user chrome-pass==0.1.6
     nativePass install
 
 Install the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/chrome-pass-zx2c4/oblajhnjmknenodebpekmkliopipoolo).
