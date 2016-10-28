@@ -34,20 +34,17 @@ function findForms() {
 }
 
 
-var forms = findForms();
-
-if(forms.length > 0) {
-  chrome.runtime.onMessage.addListener(function(msg) {
-    switch(msg.action) {
-      case "fill-pass":
-        for(var i = 0; i < forms.length; i++) {
-          forms[i].fillPass(msg.user, msg.pass);
-        }
-        break;
-      case "error":
-        console.log("chrome-pass: error " + response.msg);
-        break;
-    }
-  });
-}
+chrome.runtime.onMessage.addListener(function(msg) {
+  switch(msg.action) {
+    case "fill-pass":
+      var forms = findForms();
+      for(var i = 0; i < forms.length; i++) {
+        forms[i].fillPass(msg.user, msg.pass);
+      }
+      break;
+    case "error":
+      console.log("chrome-pass: error " + response.msg);
+      break;
+  }
+});
 
