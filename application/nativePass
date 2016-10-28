@@ -15,14 +15,14 @@ EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
 
 # Returns a similarity score between two strings.
 def similarity(pattern1, pattern2):
-    return difflib.SequenceMatcher(a=pattern1.lower(), b=pattern2.lower()).ratio()
+  return difflib.SequenceMatcher(a=pattern1.lower(), b=pattern2.lower()).ratio()
 
 # Returns the similarity score of a credential to a pattern. This method is used
 # as sort key for sorting the credential list based on similarity to the search
 # pattern.
 def sort_key(credential):
-    score = similarity(credential[1], credential[3])
-    return score
+  score = similarity(credential[1], credential[3])
+  return score
 
 # Returns a list of credentials ordered by similarity to the pattern argument.
 # The list is a list of lists with the format:
@@ -36,13 +36,13 @@ def sort_key(credential):
 def get_list(pattern):
   credentials = []
   for root, dirs, files in os.walk(STORE_PATH):
-      if len(files) > 0:
-        for f in files:
-          if f.endswith(".gpg"):
-            cred_path = root.replace(STORE_PATH, "")
-            cred_url = os.path.basename(os.path.normpath(cred_path))
-            cred_user = f.replace(".gpg", "")
-            credentials.append([cred_path, cred_url, cred_user, pattern])
+    if len(files) > 0:
+      for f in files:
+        if f.endswith(".gpg"):
+          cred_path = root.replace(STORE_PATH, "")
+          cred_url = os.path.basename(os.path.normpath(cred_path))
+          cred_user = f.replace(".gpg", "")
+          credentials.append([cred_path, cred_url, cred_user, pattern])
 
   return sorted(credentials, key = sort_key, reverse = True)
 
