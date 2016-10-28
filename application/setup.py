@@ -1,3 +1,9 @@
+# Release
+#
+# Update the version.
+# Build package with python3 setup.py sdist
+# Upload package with twine dist/*
+
 import sys
 import os
 import subprocess
