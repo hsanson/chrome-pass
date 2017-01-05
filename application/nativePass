@@ -107,8 +107,10 @@ def nativePathChrome():
     return os.environ['HOME'] + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/"
   elif sys.platform == "linux" or sys.platform == "linux2":
     return os.environ['HOME'] + "/.config/google-chrome/NativeMessagingHosts/"
+  elif sys.platform == "win32"
+    return os.environ['HOME'] + "/AppData/Roaming/Google/Chrome/NativeMessagingHosts/"
   else:
-    sys.stderr.write("Only linux or OSX are supported")
+    sys.stderr.write("Only linux, OSX or Windows are supported")
     sys.exit(1)
 
 def nativePathChromium():
@@ -116,6 +118,8 @@ def nativePathChromium():
     return os.environ['HOME'] + "/Library/Application Support/Chromium/NativeMessagingHosts/"
   elif sys.platform == "linux" or sys.platform == "linux2":
     return os.environ['HOME'] + "/.config/chromium/NativeMessagingHosts/"
+  elif sys.platform == "win32":
+    return os.environ['HOME'] + "/AppData/Roaming/Chromium/NativeMessagingHosts/"
   else:
     sys.stderr.write("Only linux or OSX are supported")
     sys.exit(1)
