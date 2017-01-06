@@ -133,11 +133,22 @@ def nativePathChromium():
 
 # Installs the Native Host Application manifest for this script into Chrome.
 def install(nativePath, extension_id):
+  name = "com.piaotech.chrome.extension.pass"
+
+  if sys.platform == "win32":
+    batch = "python \"{}\" %*".format(os.path.realpath(__file__))
+    nativeApp = name + '.bat'
+    outfile = os.path.join(nativePath, nativeApp)
+    with open(outfile, 'w') as file:
+      file.write("@echo off\n\n")
+      file.write(batch)
+  else:
+    nativeApp = os.path.realpath(__file__)
 
   manifest = OrderedDict()
-  manifest['name'] = "com.piaotech.chrome.extension.pass"
+  manifest['name'] = name
   manifest["description"] = "Chrome native host application for pass - the standard Unix password manager."
-  manifest["path"] = os.path.realpath(__file__)
+  manifest["path"] = nativeApp
   manifest["type"] = "stdio"
   manifest["allowed_origins"] = ["chrome-extension://" + extension_id + "/"]
 
