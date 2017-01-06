@@ -10,6 +10,9 @@ import difflib
 from urllib.parse import urlparse
 from collections import OrderedDict
 
+if sys.platform == "win32":
+  import winreg
+
 EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
 
 def get_store_path():
@@ -107,8 +110,12 @@ def nativePathChrome():
     return os.environ['HOME'] + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/"
   elif sys.platform == "linux" or sys.platform == "linux2":
     return os.environ['HOME'] + "/.config/google-chrome/NativeMessagingHosts/"
-  elif sys.platform == "win32"
-    return os.environ['HOME'] + "/AppData/Roaming/Google/Chrome/NativeMessagingHosts/"
+  elif sys.platform == "win32":
+    nativePath = os.environ['HOME'] + "/AppData/Roaming/Google/Chrome/NativeMessagingHosts/"
+    # Set registry value as path to manifest for chrome to find
+    key = r"Software\Google\Chrome\NativeMessagingHosts\com.piaotech.chrome.extension.pass"
+    winreg.SetValue(winreg.HKEY_CURRENT_USER, key, winreg.REG_SZ, nativePath)
+    return nativePath
   else:
     sys.stderr.write("Only linux, OSX or Windows are supported")
     sys.exit(1)
