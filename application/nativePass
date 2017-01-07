@@ -11,7 +11,14 @@ from urllib.parse import urlparse
 from collections import OrderedDict
 
 if sys.platform == "win32":
+  # Interacts with windows registry to register this app
   import winreg
+  # On Windows, the default I/O mode is O_TEXT. Set this to O_BINARY
+  # to avoid unwanted modifications of the input/output streams.
+  import msvcrt
+  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 
 EXTENSION_NAME = "com.piaotech.chrome.extension.pass"
 EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
