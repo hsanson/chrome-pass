@@ -10,8 +10,14 @@ import difflib
 from urllib.parse import urlparse
 from collections import OrderedDict
 
-STORE_PATH = os.environ['HOME'] + "/.password-store"
 EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
+
+def get_store_path():
+  if 'PASSWORD_STORE_DIR' in os.environ:
+    dir = os.environ['PASSWORD_STORE_DIR']
+  else:
+    dir = os.environ['HOME'] + "/.password-store"
+  return dir
 
 # Returns a similarity score between two strings.
 def similarity(pattern1, pattern2):
@@ -35,11 +41,11 @@ def sort_key(credential):
 #  ]
 def get_list(pattern):
   credentials = []
-  for root, dirs, files in os.walk(STORE_PATH):
+  for root, dirs, files in os.walk(get_store_path()):
     if len(files) > 0:
       for f in files:
         if f.endswith(".gpg"):
-          cred_path = root.replace(STORE_PATH, "")
+          cred_path = root.replace(get_store_path(), "")
           cred_url = os.path.basename(os.path.normpath(cred_path))
           cred_user = f.replace(".gpg", "")
           credentials.append([cred_path, cred_url, cred_user, pattern])
@@ -51,7 +57,7 @@ def get_list(pattern):
 def get_pass(path):
   password = ""
   gpg = gnupg.GPG()
-  txt = open(STORE_PATH + "/" + path + ".gpg", "rb")
+  txt = open(get_store_path() + "/" + path + ".gpg", "rb")
   data = gpg.decrypt_file(txt)
   if data.status == "decryption ok":
     password = data.data.decode('utf-8').split("\n")[0]
