@@ -17,16 +17,62 @@ python native application (nativePass).
  1. Chrome version 50 or later.
  2. Python 3.
  3. [pass](https://www.passwordstore.org/) cli tool.
+ 4. Running gpg-agent
+ 5. A pinentry program configured.
 
 # Quick Installation
 
 These instructions have been tested in Ubuntu 16.04 only:
 
+## Python native pass application install
+
     sudo apt-get install pass python3 python3-pip
     pip3 install --user chrome-pass==0.1.6
     nativePass install
 
-Install the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/chrome-pass-zx2c4/oblajhnjmknenodebpekmkliopipoolo).
+## Chrome extension install
+
+Get the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/chrome-pass-zx2c4/oblajhnjmknenodebpekmkliopipoolo).
+
+# Assumptions
+
+To reduce the code complexity of this extension there are some assumptions regarding how the password store is structured.
+In order for this extension to be able to list and decrypt your passwords these assumptions must be followed:
+
+## Password Store Location
+
+This extension assumes the password store is located inside the *.password-store* folder inside your home directory:
+
+    $HOME/.password-store
+
+in the future I may take the time to make this configurable. In case you have the password
+store located somewhere else you may try using a symbolic link to work around this
+limitation.
+
+## Password Paths
+
+This plugin assumes that the last two parts of each password path follows this structure:
+
+    [Service URL]/[Account]
+
+For example to keep some Gmail and Amazon accounts:
+
+```
+Password Store
+├── mail.google.com
+│   ├── me@gmailcom 
+│   ├── you@gmail.com
+│   └── we@gmail.com
+└── Amazon
+     ├── www.amazon.com
+     │   ├── me@gmail.com
+     │   └── wife@icloud.com
+     └── www.amazon.co.jp
+          ├── me@gmail.com
+          └── wife@icloud.com
+```
+
+Your paths can be as long as you want as long as the last two follow the above structure. And the [Service URL] part must match the URL of the page you are loading because this is the one used for searching.
 
 # Install from source
 
@@ -46,15 +92,10 @@ Next we need to install the *nativePass* wrapper script and install the Native H
 # Usage
 
  - Open any web page with a login form.
- - Click the pass button in the Chrome toolbar.
+ - Click the pass button in the Chrome tool bar.
  - Click the username you want to fill into the login form from the list.
    - You may type a search term in the search box to filter the list of usernames.
  - The form should be automatically filled with the username and corresponding password.
-
-# Limitations
-
- 1. Assumes your password store is in the default location *~/.password-store* and there is no way to change this currently.
- 2. Only works on Ubuntu/Debian linux. May work on OSX but it is not tested.
 
 # Troubleshooting
 
