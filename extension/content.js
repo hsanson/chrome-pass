@@ -19,7 +19,6 @@ Form.prototype = {
     input.value = txt;
     document.body.appendChild(input);
     input.select();
-    alert("Copy pass " + input.value + " to clipboard");
     document.execCommand('copy');
     document.body.removeChild(input);
   }
