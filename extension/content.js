@@ -9,6 +9,19 @@ Form.prototype = {
   fillPass: function(user, pass) {
     this.user.value = user;
     this.pass.value = pass;
+    this.copyToClipboard(pass);
+  },
+
+  copyToClipboard: function(txt) {
+    const input = document.createElement('input');
+    input.style.position = 'fixed';
+    input.style.opacity = 0;
+    input.value = txt;
+    document.body.appendChild(input);
+    input.select();
+    alert("Copy pass " + input.value + " to clipboard");
+    document.execCommand('copy');
+    document.body.removeChild(input);
   }
 }
 
