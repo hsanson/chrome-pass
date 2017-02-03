@@ -35,7 +35,7 @@ function findForms() {
     var formElement = passInput.form;
 
     if(formElement && (seenForms.indexOf(formElement) == -1)) {
-      var userInput = formElement.querySelector("input[type=text], input[type=email], input:not([type])");
+      var userInput = formElement.querySelector(getSelector());
       forms.push(new Form(userInput, passInput));
     }
 
@@ -43,6 +43,20 @@ function findForms() {
   }
 
   return forms;
+}
+
+// Returns the CSS selectors to find the user input field in the form. Some
+// pages have non-standard forms that require special selectors to get the
+// correct field.
+function getSelector() {
+
+  // AWS root and IAM signin page
+  if(document.baseURI.includes("signin.aws.amazon.com")) {
+    return "input[type=email],input[name=username]";
+  }
+
+  // Default CSS selector
+  return "input[type=text], input[type=email], input:not([type])";
 }
 
 
