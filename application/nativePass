@@ -52,7 +52,7 @@ def sort_key(credential):
 #  ]
 def get_list(pattern):
   credentials = []
-  for root, dirs, files in os.walk(get_store_path()):
+  for root, dirs, files in os.walk(get_store_path(), followlinks=True):
     if len(files) > 0:
       for f in files:
         if f.endswith(".gpg"):
