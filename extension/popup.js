@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
       fillLoginForm(select);
     }
 
-    if(e.keyCode === 38 || (e.ctrlKey && e.keyCode === 74)) { /* Up Arrow or Ctrl-j */
+    if(e.keyCode === 38 || (e.ctrlKey && e.keyCode === 75)) { /* Up Arrow or Ctrl-j */
       e.preventDefault();
 
       var nextIdx = Math.max(0, select.selectedIndex - 1);
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
       select.selectedIndex = nextIdx;
     }
 
-    if(e.keyCode === 40 || (e.ctrlKey && e.keyCode === 75)) { /* Down Arrow or Ctrl-k*/
+    if(e.keyCode === 40 || (e.ctrlKey && e.keyCode === 74)) { /* Down Arrow or Ctrl-k*/
       e.preventDefault();
 
       var nextIdx = Math.max(0, select.selectedIndex + 1);
