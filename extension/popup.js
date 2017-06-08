@@ -1,28 +1,30 @@
+function hasClass(element, cls) {
+  return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+
+function fillLoginForm(select) {
+  option = select.options[select.selectedIndex];
+  chrome.runtime.sendMessage({
+    action: "get-pass",
+    root: option.getAttribute("data-root"),
+    url: option.getAttribute("data-url"),
+    user: option.value
+  });
+  window.close();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+
+  var search = document.getElementById("passSearch");
+  var select = document.getElementById("passSelect");
+  var nativeError = document.getElementById("nativeError");
+  var filter = new filterlist(select);
+
+  nativeError.className = "title hidden";
 
   chrome.runtime.onMessage.addListener(function(msg, sender, response) {
     switch(msg.action) {
       case "fill-creds":
-        var select = document.getElementById("passSelect");
-        var search = document.getElementById("passSearch");
-        var nativeError = document.getElementById("nativeError");
-
-        nativeError.className = "title hidden";
-
-        select.addEventListener("change", function(event) {
-          option = select.options[select.selectedIndex];
-          chrome.runtime.sendMessage({
-            action: "get-pass",
-            root: option.getAttribute("data-root"),
-            url: option.getAttribute("data-url"),
-            user: option.value
-          });
-          window.close();
-        });
-
-        search.addEventListener("input", function(event) {
-          filter.set(search.value);
-        });
 
         var optGroups = {};
         var credentials = msg.credentials;
@@ -50,7 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
           group.appendChild(option);
         }
 
-        var filter = new filterlist(select);
+        // Set as selected the first non-hidden option in the select box.
+        var option = select.querySelector("option:not(.hidden)")
+        if(option) {
+          option.selected = true;
+        }
+
         search.focus();
         break;
 
@@ -65,8 +72,84 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     currentTab = tabs[0];
     chrome.runtime.sendMessage({ action: "get-creds", url: currentTab.url });
-  })
+  });
+
+  search.addEventListener('keydown', function(e) {
+
+    if(e.keyCode === 13) { /* Enter */
+      e.preventDefault();
+      fillLoginForm(select);
+    }
+
+    if(e.keyCode === 38 || (e.ctrlKey && e.keyCode === 74)) { /* Up Arrow or Ctrl-j */
+      e.preventDefault();
+
+      var nextIdx = Math.max(0, select.selectedIndex - 1);
+      var nextOption = select.options[nextIdx];
+
+      while(true) {
+
+        nextOption = select.options[nextIdx];
+
+        if(nextOption && !hasClass(nextOption, "hidden")) {
+          break;
+        }
+
+        nextIdx = nextIdx - 1;
+
+        if(nextIdx < 0) {
+          nextIdx = select.selectedIndex;
+          break;
+        }
+
+      }
+
+      select.selectedIndex = nextIdx;
+    }
+
+    if(e.keyCode === 40 || (e.ctrlKey && e.keyCode === 75)) { /* Down Arrow or Ctrl-k*/
+      e.preventDefault();
+
+      var nextIdx = Math.max(0, select.selectedIndex + 1);
+      var nextOption = select.options[nextIdx];
+
+      while(true) {
+
+        nextOption = select.options[nextIdx];
+
+        if(nextOption && !hasClass(nextOption, "hidden")) {
+          break;
+        }
+
+        nextIdx = nextIdx + 1;
+
+        if(nextIdx > select.options.length - 1) {
+          nextIdx = select.selectedIndex;
+          break;
+        }
+
+      }
+
+      select.selectedIndex = nextIdx;
+    }
+
+  });
+
+  select.addEventListener("click", function(event) {
+    fillLoginForm(select);
+  });
+
+  search.addEventListener("input", function(event) {
+
+    filter.set(search.value);
+
+    // Set as selected the first non-hidden option in the select box.
+    var option = select.querySelector("option:not(.hidden)")
+    if(option) {
+      option.selected = true;
+    }
+
+  });
 
 }, false);
-
 

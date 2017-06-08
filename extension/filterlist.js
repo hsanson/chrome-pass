@@ -48,5 +48,6 @@ function filterlist(selectobj) {
         group.className = "";
       }
     }
+
   }
 }
