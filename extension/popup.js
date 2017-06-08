@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
           option.text = credentials[i][2];
           option.setAttribute("data-root", credentials[i][0]);
           option.setAttribute("data-url", credentials[i][1]);
+          option.setAttribute("data-path", credentials[i][0] + "/" + credentials[i][2]);
           group.appendChild(option);
         }
 

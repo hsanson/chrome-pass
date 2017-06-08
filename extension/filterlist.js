@@ -18,7 +18,7 @@ function filterlist(selectobj) {
     if (!this.selectobj.options) return;
 
     try {
-      regexp = new RegExp(pattern, 'i');
+      regexp = new RegExp(pattern.split('').join('.*?'), 'i');
     } catch(e) {
       return;
     }
@@ -28,22 +28,25 @@ function filterlist(selectobj) {
       var group = groups[i];
       var options = group.getElementsByTagName("option");
 
-      for(var j = 0; j < options.length; j++) {
+      for (var j=0; j < options.length; j++) {
         var option = options[j];
-        var url    = option.getAttribute("data-url");
-        var user   = option.value;
+        var path   = option.getAttribute("data-path")
 
-        // If a single match is found the whole group is displayed.
-        if (regexp.test(user) || regexp.test(url)) {
-          group.className = "";
-          break;
+        if (regexp.test(path)) {
+          option.className = "";
+        } else {
+          option.className = "hidden";
         }
+      }
 
-        // If no match is found then the group is hidden.
-        group.className = "hidden"
+      // If all options in a group do not match then hide the group itself.
+      var hiddenCount = group.querySelectorAll("option.hidden").length;
+
+      if (hiddenCount == options.length) {
+        group.className = "hidden";
+      } else {
+        group.className = "";
       }
     }
-
   }
-
 }
