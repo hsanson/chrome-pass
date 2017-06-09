@@ -27,7 +27,7 @@ These instructions have been tested in Ubuntu 16.04 only:
 ## Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.1.7
+    pip3 install --user chrome-pass==0.2.1
     nativePass install
 
 ## Chrome extension install

@@ -1,8 +1,8 @@
 # Release
 #
 # Update the version.
-# Build package with python3 setup.py sdist
-# Upload package with twine dist/*
+# Build package with `python3 setup.py sdist`
+# Upload package with `twine upload dist/*`
 
 import sys
 import os
