@@ -105,6 +105,13 @@ def process_native():
   except Exception:
     send_message({ "action": "error", "msg": sys.exc_info()[0] })
 
+# Method prints to stdout the list of passwords ordered by a similarty pattern
+def print_pass(pattern):
+  for credential in get_list(pattern)[:10]:
+    account = credential[0] + "/" + credential[2]
+    password = get_pass(account)
+    print("pass %s  %s" % (account, password))
+
 # Method prints to stdout the list of credentials ordered by a similarity to
 # pattern.
 def print_creds(pattern):
@@ -181,6 +188,9 @@ if len(sys.argv) > 1:
     else:
       install(nativePathChrome(), EXTENSION_ID)
       install(nativePathChromium(), EXTENSION_ID)
+  elif sys.argv[1] == "pass":
+    if len(sys.argv) > 2:
+      print_pass(sys.argv[2])
   else:
     print_creds(sys.argv[1])
 
