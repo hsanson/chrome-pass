@@ -27,7 +27,7 @@ These instructions have been tested in Ubuntu 16.04 only:
 ## Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.2.2
+    pip3 install --user chrome-pass==0.2.3
     nativePass install
 
 ## Chrome extension install
@@ -108,3 +108,10 @@ If for some reason the extension is unable to get the list of usernames from you
    - Ensure the *path* contains the absolute path to the location of the nativePass wrapper script.
    - Ensure the *allowed_origins* contains the URI with the exact extension ID installed in Chrome. To get the extension ID simply browse chrome://extensions and look for the ID of the chrome-pass extension installed.
 
+# Note about python-gnupg
+
+It has been found that the nativePass application is unable to decrypt the gpg passwords with some newer versions of
+python-gnupg. I can verify that the plugin works without issues when using gnupg module version 0.3.9 found by default in Ubuntu
+16.04LTS. 
+
+See related issue for details at: https://github.com/hsanson/chrome-pass/issues/8
