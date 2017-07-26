@@ -67,7 +67,7 @@ def get_list(pattern):
 # a unique existing gpg file inside the password store.
 def get_pass(path):
   password = ""
-  gpg = gnupg.GPG(use_agent=True)
+  gpg = gnupg.GPG(gpgbinary="gpg2")
   txt = open(get_store_path() + "/" + path + ".gpg", "rb")
   data = gpg.decrypt_file(txt)
   if data.ok:
