@@ -67,13 +67,15 @@ def get_list(pattern):
 # a unique existing gpg file inside the password store.
 def get_pass(path):
   password = ""
-  gpg = gnupg.GPG()
+  gpg = gnupg.GPG(use_agent=True)
   txt = open(get_store_path() + "/" + path + ".gpg", "rb")
   data = gpg.decrypt_file(txt)
-  if data.status == "decryption ok":
+  if data.ok:
     password = data.data.decode('utf-8').split("\n")[0]
+    return password
+  else:
+    raise RuntimeError(data.stderr)
 
-  return password
 
 # Sends the response message with the format that chrome HostNativeApplications expect.
 def send_message(message):
@@ -102,6 +104,8 @@ def process_native():
       user = request["user"]
       path = request["path"]
       send_message({ "action": "fill-pass", "user": user, "pass": get_pass(path) })
+  except RuntimeError as e:
+    send_message({ "action": "error", "msg": str(e) })
   except Exception:
     send_message({ "action": "error", "msg": sys.exc_info()[0] })
 
@@ -109,8 +113,11 @@ def process_native():
 def print_pass(pattern):
   for credential in get_list(pattern)[:10]:
     account = credential[0] + "/" + credential[2]
-    password = get_pass(account)
-    print("pass %s  %s" % (account, password))
+    try:
+      password = get_pass(account)
+      print("pass %s  %s" % (account, password))
+    except RuntimeError as e:
+      print("pass %s  %s" % (account, str(e)))
 
 # Method prints to stdout the list of credentials ordered by a similarity to
 # pattern.

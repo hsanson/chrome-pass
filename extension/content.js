@@ -68,7 +68,7 @@ chrome.runtime.onMessage.addListener(function(msg) {
         forms[i].fillPass(msg.user, msg.pass);
       }
       break;
-    case "error":
+    case "native-app-error":
       console.log("chrome-pass: error " + response.msg);
       break;
   }

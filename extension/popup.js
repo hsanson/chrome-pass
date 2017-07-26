@@ -10,7 +10,6 @@ function fillLoginForm(select) {
     url: option.getAttribute("data-url"),
     user: option.value
   });
-  window.close();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var select = document.getElementById("passSelect");
   var nativeError = document.getElementById("nativeError");
   var filter = new filterlist(select);
+
+  window.name = "chrome-pass-popup";
 
   nativeError.className = "title hidden";
 
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
       case "native-app-error":
         var nativeError = document.getElementById("nativeError");
         nativeError.className = "error";
+        nativeError.innerText = msg.msg;
         break;
     }
 

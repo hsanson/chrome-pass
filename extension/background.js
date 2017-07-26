@@ -9,10 +9,19 @@ function getCredentials(url, tabId) {
             chrome.runtime.sendMessage({ action: "fill-creds", url: response.url, credentials: response.credentials });
           }
         } else {
-          chrome.runtime.sendMessage({ action: "native-app-error" });
+          chrome.runtime.sendMessage({ action: "native-app-error" , msg: "No response from native app"});
         }
       }
   );
+}
+
+function closePopup() {
+  var popups = chrome.extension.getViews({type: "popup"});
+  for(i = 0; i < popups.length; i++) {
+    if(popups[i].name == "chrome-pass-popup") {
+      popups[i].close();
+    }
+  }
 }
 
 function getPass(root, url, user, tabId) {
@@ -20,13 +29,19 @@ function getPass(root, url, user, tabId) {
       { action: "get-pass", user: user, path: root + "/" + user },
       function(response) {
         if(response) {
-          chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-            currentTab = tabs[0];
-            chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", user: user, pass: response.pass });
-          });
+          if(response.action == "fill-pass") {
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+              currentTab = tabs[0];
+              chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", user: user, pass: response.pass });
+            });
+            closePopup();
+          } else {
+            console.log("Error " + response.msg);
+            chrome.runtime.sendMessage({ action: "native-app-error", msg: response.msg });
+          }
         } else {
           console.log("Native app returned no response");
-          chrome.runtime.sendMessage({ action: "native-app-error" });
+          chrome.runtime.sendMessage({ action: "native-app-error", msg: "No response from native app" });
         }
       }
   );
