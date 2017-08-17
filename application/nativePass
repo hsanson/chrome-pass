@@ -6,6 +6,7 @@ import sys
 import json
 import gnupg
 import struct
+import shutil
 import difflib
 from urllib.parse import urlparse
 from collections import OrderedDict
@@ -22,6 +23,14 @@ if sys.platform == "win32":
 
 EXTENSION_NAME = "com.piaotech.chrome.extension.pass"
 EXTENSION_ID = "oblajhnjmknenodebpekmkliopipoolo"
+
+def get_gpg_bin():
+  if 'PASS_GPG_BIN' in os.environ:
+    return os.environ['PASS_GPG_BIN']
+  elif shutil.which('gpg2'):
+    return shutil.which('gpg2')
+  elif shutil.which('gpg'):
+    return shutil.which('gpg')
 
 def get_store_path():
   if 'PASSWORD_STORE_DIR' in os.environ:
@@ -67,7 +76,7 @@ def get_list(pattern):
 # a unique existing gpg file inside the password store.
 def get_pass(path):
   password = ""
-  gpg = gnupg.GPG(use_agent=True)
+  gpg = gnupg.GPG(use_agent=True, gpgbinary=get_gpg_bin())
   txt = open(get_store_path() + "/" + path + ".gpg", "rb")
   data = gpg.decrypt_file(txt)
   if data.ok:
@@ -198,6 +207,8 @@ if len(sys.argv) > 1:
   elif sys.argv[1] == "pass":
     if len(sys.argv) > 2:
       print_pass(sys.argv[2])
+  elif sys.argv[1] == "gpgbin":
+      print("GPG Binary path: %s"%get_gpg_bin())
   else:
     print_creds(sys.argv[1])
 
