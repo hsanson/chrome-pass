@@ -7,9 +7,16 @@ function Form(user, pass) {
 Form.prototype = {
 
   fillPass: function(user, pass) {
-    this.user.value = user;
-    this.pass.value = pass;
-    this.copyToClipboard(pass);
+
+    if(this.user != undefined) {
+      this.user.value = user;
+    }
+
+    if(this.pass != undefined) {
+      this.pass.value = pass;
+      this.copyToClipboard(pass);
+    }
+
   },
 
   copyToClipboard: function(txt) {
@@ -25,6 +32,15 @@ Form.prototype = {
 }
 
 function findForms() {
+
+  if(document.baseURI.includes("amazon")) {
+    return findAmazonEmailForms();
+  }
+
+  return findPasswordForms();
+}
+
+function findPasswordForms() {
   var forms = [];
   var passInputs = document.querySelectorAll("input[type=password]");
 
@@ -35,7 +51,7 @@ function findForms() {
     var formElement = passInput.form;
 
     if(formElement && (seenForms.indexOf(formElement) == -1)) {
-      var userInput = formElement.querySelector(getSelector());
+      var userInput = formElement.querySelector("input[type=text], input[type=email], input:not([type])");
       forms.push(new Form(userInput, passInput));
     }
 
@@ -45,20 +61,38 @@ function findForms() {
   return forms;
 }
 
-// Returns the CSS selectors to find the user input field in the form. Some
-// pages have non-standard forms that require special selectors to get the
-// correct field.
-function getSelector() {
+// Special case for amazon market and aws login pages.
+function findAmazonEmailForms() {
 
-  // AWS root and IAM signin page
-  if(document.baseURI.includes("signin.aws.amazon.com")) {
-    return "input[type=email],input[name=username]";
+  var forms = [];
+  var emailInput = document.querySelector("input[type=email]");
+
+  if(emailInput) {
+    forms.push(new Form(emailInput, undefined));
   }
 
-  // Default CSS selector
-  return "input[type=text], input[type=email], input:not([type])";
-}
+  var passwordInput = document.querySelector("input[type=password]");
 
+  if(passwordInput) {
+    forms.push(new Form(undefined, passwordInput));
+  }
+
+  // Special input for AWS root login
+  var resolvingInput = document.querySelector("input[id=resolving_input]");
+
+  if(resolvingInput) {
+    forms.push(new Form(resolvingInput, undefined));
+  }
+
+  // Special input for AWS signin
+  var nameInput = document.querySelector("input[name=username]");
+
+  if(nameInput && passwordInput) {
+    forms.push(new Form(nameInput, passwordInput));
+  }
+
+  return forms;
+}
 
 chrome.runtime.onMessage.addListener(function(msg) {
   switch(msg.action) {
