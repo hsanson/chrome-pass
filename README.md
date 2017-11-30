@@ -108,10 +108,20 @@ If for some reason the extension is unable to get the list of usernames from you
    - Ensure the *path* contains the absolute path to the location of the nativePass wrapper script.
    - Ensure the *allowed_origins* contains the URI with the exact extension ID installed in Chrome. To get the extension ID simply browse chrome://extensions and look for the ID of the chrome-pass extension installed.
 
-# Note about python-gnupg
+## Note about python-gnupg
 
 It has been found that the nativePass application is unable to decrypt the gpg passwords with some newer versions of
 python-gnupg. I can verify that the plugin works without issues when using gnupg module version 0.3.9 found by default in Ubuntu
 16.04LTS. 
 
 See related issue for details at: https://github.com/hsanson/chrome-pass/issues/8
+
+## Note about MacOS
+
+If the plugin works when you launch chrome from within
+a terminal, but does not work when launched from Spotlight or
+any other launcher, then ensure the PATH environment variable
+is correctly set by the launcher.
+
+See related issue for details at: https://github.com/hsanson/chrome-pass/issues/13
+
