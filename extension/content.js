@@ -15,6 +15,15 @@ Form.prototype = {
     if(this.pass != undefined) {
       this.pass.value = pass;
       this.copyToClipboard(pass);
+
+      // I'm not sure why the zero-second timeout was necessary here, but
+      // without it I got occasional failures to focus the password input. I
+      // understand what it does (delay execution until the currently executing
+      // function is done), but I'm not sure why that resolves the issue I saw.
+      var pass_field = this.pass;
+      setTimeout(function() {
+        pass_field.focus();
+      }, 0);
     }
 
   },
