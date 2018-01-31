@@ -16,10 +16,21 @@ Form.prototype = {
       this.pass.value = pass;
       this.copyToClipboard(pass);
 
-      // I'm not sure why the zero-second timeout was necessary here, but
-      // without it I got occasional failures to focus the password input. I
-      // understand what it does (delay execution until the currently executing
-      // function is done), but I'm not sure why that resolves the issue I saw.
+      // Without the 0-millisecond setTimeout() call the password input does
+      // not always receive focus.
+      //
+      // The 0-milli setTimeout() is a time-honored way of asking a JS engine
+      // "Once all the currently-scheduled functions have finished running,
+      // please run me as soon as you can." See
+      // https://stackoverflow.com/q/779379 and
+      // https://johnresig.com/blog/how-javascript-timers-work/ for further
+      // discussion of how that works if that doesn't make sense.
+      //
+      // That said, it is not clear why that scheduling delay is necessary here
+      // since the element should just exist and therefore receive focus. A
+      // guess might be that focus is explicitly set somewhere on popup close,
+      // so we need to wait to set focus on the password input until that has
+      // happened.
       var pass_field = this.pass;
       setTimeout(function() {
         pass_field.focus();
@@ -116,4 +127,3 @@ chrome.runtime.onMessage.addListener(function(msg) {
       break;
   }
 });
-
