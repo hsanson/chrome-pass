@@ -1,6 +1,7 @@
 # Release
 #
-# Update the version.
+# pip3 install --user twine
+# Update the version string below.
 # Build package with `python3 setup.py sdist`
 # Upload package with `twine upload dist/*`
 
@@ -22,7 +23,7 @@ class install_native_app(install):
 
 setup(
   name="chrome-pass",
-  version="0.2.3",
+  version="0.2.4",
   description="Chrome Native application for pass - the standard Unix password manager",
   url="https://github.com/hsanson/chrome-pass",
   author="Horacio Sanson",
