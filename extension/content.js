@@ -33,7 +33,7 @@ Form.prototype = {
       // happened.
       var pass_field = this.pass;
       setTimeout(function() {
-        pass_field.focus();
+        pass_field.dispatchEvent(new Event('focus'));
       }, 0);
     }
 
