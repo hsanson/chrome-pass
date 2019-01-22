@@ -57,6 +57,10 @@ function findForms() {
     return findAmazonEmailForms();
   }
 
+  if(document.baseURI.includes("idmsa.apple.com")) {
+    return findAppleDeveloperForms();
+  }
+
   return findPasswordForms();
 }
 
@@ -76,6 +80,25 @@ function findPasswordForms() {
     }
 
     seenForms.push(formElement);
+  }
+
+  return forms;
+}
+
+// Special case for Apple Developer portal loging page.
+function findAppleDeveloperForms() {
+
+  var forms = [];
+  var userInput = document.querySelector("#account_name_text_field");
+
+  if(userInput) {
+    forms.push(new Form(userInput, undefined));
+  }
+
+  var passwordInput = document.querySelector("input[type=password]");
+
+  if(passwordInput) {
+    forms.push(new Form(undefined, passwordInput));
   }
 
   return forms;
