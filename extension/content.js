@@ -1,3 +1,9 @@
+function focus(ele) {
+  setTimeout(function() {
+    ele.focus();
+  }, 0);
+}
+
 function fillDefaultForm(user, pass) {
 
   var passInputs = document.querySelectorAll("input[type=password]");
@@ -14,6 +20,7 @@ function fillDefaultForm(user, pass) {
       if(userInput && passInput) {
         userInput.value = user;
         passInput.value = pass;
+        focus(passInput);
       }
     }
 
@@ -33,6 +40,7 @@ function fillAppleDeveloperForms(user, pass) {
 
   if(passwordInput) {
     passwordInput.value = pass;
+    focus(passwordInput);
   }
 }
 
@@ -48,6 +56,7 @@ function fillAmazonLoginForm(user, pass) {
 
   if(passwordInput) {
     passwordInput.value = pass;
+    focus(passwordInput);
   }
 }
 
@@ -70,6 +79,7 @@ function fillAwsLoginForm(path, user, pass) {
 
   if(passwordInput) {
     passwordInput.value = pass;
+    focus(passwordInput);
   }
 
   // Account input box for IAM login
