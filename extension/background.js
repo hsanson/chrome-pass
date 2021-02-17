@@ -32,7 +32,7 @@ function getPass(root, url, user, tabId) {
           if(response.action == "fill-pass") {
             chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
               currentTab = tabs[0];
-              chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", user: user, pass: response.pass });
+              chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", path: root, user: user, pass: response.pass });
             });
             closePopup();
           } else {
