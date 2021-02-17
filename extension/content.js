@@ -4,6 +4,50 @@ function focus(ele) {
   }, 0);
 }
 
+// Helper method to genearate fake events. Needed for some javascript heavy
+// forms that won't work unles these events are triggered.
+//
+// Taken from passff
+// https://github.com/passff/passff/blob/master/src/modules/page.js
+function createFakeEvent(typeArg) {
+  if (['keydown', 'keyup', 'keypress'].includes(typeArg)) {
+    return new KeyboardEvent(typeArg, {
+      'key': ' ',
+      'code': ' ',
+      'charCode': ' '.charCodeAt(0),
+      'keyCode': ' '.charCodeAt(0),
+      'which': ' '.charCodeAt(0),
+      'bubbles': true,
+      'composed': true,
+      'cancelable': true
+    });
+  } else if (['input', 'change'].includes(typeArg)) {
+    return new InputEvent(typeArg, {
+      'bubbles': true,
+      'composed': true,
+      'cancelable': true
+    });
+  } else if (['focus', 'blur'].includes(typeArg)) {
+    return new FocusEvent(typeArg, {
+      'bubbles': true,
+      'composed': true,
+      'cancelable': true
+    });
+  } else {
+    log.error("createFakeEvent: Unknown event type: " + typeArg);
+    return null;
+  }
+}
+
+function writeValueWithEvents(input, value) {
+  input.value = value;
+  for (let action of ['focus', 'keydown', 'keyup', 'keypress',
+    'input', 'change', 'blur']) {
+    input.dispatchEvent(createFakeEvent(action));
+    input.value = value;
+  }
+}
+
 function fillDefaultForm(user, pass) {
 
   var passInputs = document.querySelectorAll("input[type=password]");
@@ -18,8 +62,8 @@ function fillDefaultForm(user, pass) {
       var userInput = formElement.querySelector("input[type=text], input[type=email], input:not([type])");
 
       if(userInput && passInput) {
-        userInput.value = user;
-        passInput.value = pass;
+        writeValueWithEvents(userInput, user);
+        writeValueWithEvents(passInput, pass);
         focus(passInput);
       }
     }
