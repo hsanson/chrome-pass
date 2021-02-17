@@ -1,0 +1,10 @@
+= Changelog
+
+== v0.3.0
+
+*Improvements*
+
+* Re-worked form fill code. Easier to handle special forms.
+* Add special handling for AWS IAM login.
+** URLs like https://alias.sigin.aws.amazon.com now fill the account input with the alias or account number.
+* Add fake event generators for javascript heavy forms that require events to trigger some javascript code.
