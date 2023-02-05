@@ -165,7 +165,7 @@ def native_path_chrome():
         return os.path.expanduser(
             '~'
         ) + "/Library/Application Support/Google/Chrome/NativeMessagingHosts/"
-    if sys.platform == "linux" or sys.platform == "linux2":
+    if sys.platform in ("linux", "linux2"):
         return os.path.expanduser(
             '~') + "/.config/google-chrome/NativeMessagingHosts/"
     if sys.platform == "win32":
@@ -181,7 +181,7 @@ def native_path_chromium():
         return os.path.expanduser(
             '~'
         ) + "/Library/Application Support/Chromium/NativeMessagingHosts/"
-    if sys.platform == "linux" or sys.platform == "linux2":
+    if sys.platform in ("linux", "linux2"):
         return os.path.expanduser(
             '~') + "/.config/chromium/NativeMessagingHosts/"
     if sys.platform == "win32":
@@ -189,6 +189,15 @@ def native_path_chromium():
             '~') + "/AppData/Roaming/Chromium/NativeMessagingHosts/"
 
     sys.stderr.write("Only linux or OSX are supported")
+    sys.exit(1)
+
+
+def native_path_brave():
+    if sys.platform in ("linux", "linux2"):
+        return os.path.expanduser(
+           '~') + "/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/"
+
+    sys.stderr.write("Only linux is supported, patches welcome!!.")
     sys.exit(1)
 
 
@@ -235,9 +244,11 @@ if len(sys.argv) > 1:
         if len(sys.argv) > 2:
             install(native_path_chrome(), sys.argv[2])
             install(native_path_chromium(), sys.argv[2])
+            install(native_path_brave(), sys.argv[2])
         else:
             install(native_path_chrome(), EXTENSION_ID)
             install(native_path_chromium(), EXTENSION_ID)
+            install(native_path_brave(), EXTENSION_ID)
     elif sys.argv[1] == "pass":
         if len(sys.argv) > 2:
             print_pass(sys.argv[2])
