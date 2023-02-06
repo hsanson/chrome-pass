@@ -17,10 +17,11 @@ chromium browser and the python native application (nativePass).
 ## Requirements
 
  1. Chrome version 50 or later.
- 2. Python 3.
- 3. [pass](https://www.passwordstore.org/) cli tool.
- 4. Running gpg-agent
- 5. A pinentry program configured.
+ 2. Python 3+.
+ 3. pip 23.0 or newer
+ 4. [pass](https://www.passwordstore.org/) cli tool.
+ 5. Running gpg-agent
+ 6. A pinentry program configured.
 
 ## Quick Installation
 
