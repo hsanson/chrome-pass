@@ -84,16 +84,23 @@ def get_url(path):
 
 # Returns the pass password for the specified path. The path must corresponde
 # to a unique existing gpg file inside the password store.
-def get_pass(path):
+def get_pass(path, user):
     password = ""
     gpg = gnupg.GPG(use_agent=True, gpgbinary=get_gpg_bin())
     txt = open(get_store_path() + "/" + path + ".gpg", "rb")
     data = gpg.decrypt_file(txt)
     if data.ok:
-        password = data.data.decode('utf-8').split("\n")[0]
-        return password
-
-    raise RuntimeError(f"Failed to decrypt {txt}")
+        credentials = data.data.decode('utf-8').split("\n")
+        password = credentials[0]
+        credentials = credentials[1:]
+        if len(credentials) < 1:
+            return user, password
+        user = credentials[0]
+        for line in credentials:
+            if ("user name" in line.lower()) or ("email" in line.lower()):
+                user = line.split(" ")[-1]
+        return user, password
+    raise RuntimeError("Failed to decrypt %s" % txt)
 
 
 # Sends the response message with the format that chrome HostNativeApplications
@@ -128,10 +135,11 @@ def process_native():
         elif action == "get-pass":
             user = request["user"]
             path = request["path"]
+            user, password = get_pass(path, user)
             send_message({
                 "action": "fill-pass",
                 "user": user,
-                "pass": get_pass(path)
+                "pass": password
             })
     except RuntimeError as e:
         send_message({"action": "error", "msg": str(e)})
