@@ -93,7 +93,7 @@ def get_pass(path):
         password = data.data.decode('utf-8').split("\n")[0]
         return password
 
-    raise RuntimeError(f"Failed to decrypt {txt}")
+    raise RuntimeError("Failed to decrypt %s" % txt)
 
 
 # Sends the response message with the format that chrome HostNativeApplications
@@ -145,9 +145,9 @@ def print_pass(pattern):
         account = credential[0] + "/" + credential[2]
         try:
             password = get_pass(account)
-            print(f"pass {account}  {password}" % (account, password))
+            print("pass %s  %s" % (account, password))
         except RuntimeError as e:
-            print(f"pass {account}  {str(e)}")
+            print("pass %s  %s" % (account, str(e)))
 
 
 # Method prints to stdout the list of credentials ordered by a similarity to
