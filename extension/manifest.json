@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "chrome-pass (ZX2C4)",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Chrome plugin for *pass* the standard unix password manager.",
   "minimum_chrome_version": "50",
   "author": "Horacio Sanson",
@@ -11,7 +11,7 @@
     "48": "icons/pass48.png",
     "128": "icons/pass128.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "icons/pass19.png",
       "38": "icons/pass38.png",
@@ -28,7 +28,8 @@
     }
   ],
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js",
+    "type": "module"
   },
   "permissions": [
     "tabs",

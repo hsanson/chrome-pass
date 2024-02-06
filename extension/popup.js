@@ -67,6 +67,10 @@ document.addEventListener('DOMContentLoaded', function() {
         nativeError.className = "error";
         nativeError.innerText = msg.msg;
         break;
+
+      case "close-popup":
+        window.close();
+        break;
     }
 
   });
