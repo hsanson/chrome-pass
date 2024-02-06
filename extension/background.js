@@ -15,26 +15,17 @@ function getCredentials(url, tabId) {
   );
 }
 
-function closePopup() {
-  var popups = chrome.extension.getViews({type: "popup"});
-  for(i = 0; i < popups.length; i++) {
-    if(popups[i].name == "chrome-pass-popup") {
-      popups[i].close();
-    }
-  }
-}
-
 function getPass(root, url, user, tabId) {
   chrome.runtime.sendNativeMessage('com.piaotech.chrome.extension.pass',
       { action: "get-pass", user: user, path: root + "/" + user },
       function(response) {
         if(response) {
           if(response.action == "fill-pass") {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-              currentTab = tabs[0];
+            chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+              var currentTab = tabs[0];
               chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", path: root, user: user, pass: response.pass });
             });
-            closePopup();
+            chrome.runtime.sendMessage({ action: "close-popup" });
           } else {
             console.log("Error " + response.msg);
             chrome.runtime.sendMessage({ action: "native-app-error", msg: response.msg });
