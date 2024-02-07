@@ -107,7 +107,7 @@ def get_creds(path):
     data = read_data(path).decode('utf-8').split("\n")
 
     # Filter creds
-    reg = re.compile('^\w*=.*$')
+    reg = re.compile(r'^\w*=.*$')
     filtered = list(filter(reg.search, data))
 
     # Convert to dictionary
@@ -164,21 +164,16 @@ def process_native():
 
 
 # Method prints to stdout the list of passwords ordered by a similarty pattern
-def print_pass(pattern):
+def print_list(pattern):
     for credential in get_list(pattern)[:20]:
-        account = credential[0] + "/" + credential[2]
-        try:
-            password = get_pass(account)
-            print(f'pass {account}  {password}')
-        except RuntimeError as e:
-            print(f'pass {account}  {str(e)}')
+        print(credential)
 
 
 # Method prints to stdout the first match creds data.
 def print_creds(pattern):
-    credential = get_list(pattern)[0]
-    account = credential[0] + "/" + credential[2]
-    print(f'{get_creds(account)}')
+    for credential in get_list(pattern)[:20]:
+        account = credential[0] + "/" + credential[2]
+        print(f'{get_creds(account)}')
 
 
 # Determines the path were the native app manifest should be installed.
@@ -273,8 +268,8 @@ if len(sys.argv) > 1:
             install(native_path_brave(), EXTENSION_ID)
     elif sys.argv[1] == "pass":
         if len(sys.argv) > 2:
-            print_pass(sys.argv[2])
+            print_creds(sys.argv[2])
     elif sys.argv[1] == "gpgbin":
         print(f"GPG Binary path: {get_gpg_bin()}")
     else:
-        print_creds(sys.argv[1])
+        print_list(sys.argv[1])
