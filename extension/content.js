@@ -48,6 +48,8 @@ function writeValueWithEvents(input, value) {
   }
 }
 
+// Uses heuristics to try figuring out the login form password and
+// username/email input fields.
 function fillDefaultForm(user, pass) {
 
   var passInputs = document.querySelectorAll("input[type=password]");
@@ -72,69 +74,6 @@ function fillDefaultForm(user, pass) {
   }
 }
 
-function fillAppleDeveloperForms(user, pass) {
-
-  var userInput = document.querySelector("#account_name_text_field");
-
-  if(userInput) {
-    userInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-}
-
-function fillAmazonLoginForm(user, pass) {
-
-  var emailInput = document.querySelector("input[type=email]");
-
-  if(emailInput) {
-    emailInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-}
-
-function fillAwsLoginForm(path, user, pass) {
-
-  // Special input for AWS root login
-  var resolvingInput = document.querySelector("input[id=resolving_input]");
-
-  if(resolvingInput) {
-    resolvingInput.value = user;
-  }
-
-  var nameInput = document.querySelector("input[name=username]");
-
-  if(nameInput) {
-    nameInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-
-  // Account input box for IAM login
-  var accountInput = document.querySelector("input[name=account]");
-
-  if(accountInput) {
-    accountInput.value = path.split(/[\\/]/).pop()
-      .replace(/.?signin.aws.amazon.com/,"");
-  }
-}
-
 // Helper method to copy the password to clipboard.
 function copyToClipboard(txt) {
   const input = document.createElement('input');
@@ -147,27 +86,47 @@ function copyToClipboard(txt) {
   document.body.removeChild(input);
 }
 
-// Heavy work function that finds login forms and fills them with the
-// credentials.
-function fillForm(path, user, pass) {
+function fillForm(creds) {
 
-  copyToClipboard(pass);
+  fillDefaultForm(creds["pass__user"], creds["pass__password"])
 
+  // AWS signin forms has two text inputs for username and account. Here we
+  // specifically fill username.
   if(document.baseURI.includes("signin.aws.amazon.com")) {
-     fillAwsLoginForm(path, user, pass);
-  } else if(document.baseURI.includes("amazon")) {
-     fillAmazonLoginForm(user, pass);
-  } else if(document.baseURI.includes("idmsa.apple.com")) {
-     fillAppleDeveloperForms(user, pass);
-  } else {
-    fillDefaultForm(user, pass);
+    var input = document.querySelector("input[id=username]");
+    writeValueWithEvents(input, creds["pass__user"]);
+  }
+
+  // As usual Apple overcomplicates things
+  if(document.baseURI.includes("idmsa.apple.com")) {
+
+    var userInput = document.querySelector("#account_name_text_field");
+
+    if(userInput) {
+      writeValueWithEvents(userInput, creds["pass__user"]);
+    }
+
+    var passwordInput = document.querySelector("input[type=password]");
+
+    if(passwordInput) {
+      writeValueWithEvents(passwordInput, creds["pass__password"]);
+      focus(passwordInput);
+    }
+  }
+
+  for(const [key, value] of Object.entries(creds)) {
+    var input = document.querySelector("input[name=" + key + "]");
+
+    if(input != null) {
+      writeValueWithEvents(input, value);
+    }
   }
 }
 
 chrome.runtime.onMessage.addListener(function(msg) {
   switch(msg.action) {
     case "fill-pass":
-      fillForm(msg.path, msg.user, msg.pass);
+      fillForm(msg.creds);
       break;
     case "native-app-error":
       console.log("chrome-pass: error " + response.msg);
