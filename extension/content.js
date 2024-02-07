@@ -63,8 +63,11 @@ function fillDefaultForm(user, pass) {
     if(formElement && (seenForms.indexOf(formElement) == -1)) {
       var userInput = formElement.querySelector("input[type=text], input[type=email], input:not([type])");
 
-      if(userInput && passInput) {
+      if(userInput) {
         writeValueWithEvents(userInput, user);
+      }
+
+      if(passInput) {
         writeValueWithEvents(passInput, pass);
         focus(passInput);
       }
@@ -88,17 +91,39 @@ function copyToClipboard(txt) {
 
 function fillForm(creds) {
 
-  fillDefaultForm(creds["pass__user"], creds["pass__password"])
-
   // AWS signin forms has two text inputs for username and account. Here we
   // specifically fill username.
   if(document.baseURI.includes("signin.aws.amazon.com")) {
-    var input = document.querySelector("input[id=username]");
-    writeValueWithEvents(input, creds["pass__user"]);
-  }
 
-  // As usual Apple overcomplicates things
-  if(document.baseURI.includes("idmsa.apple.com")) {
+    // First page asking for root or IAM account has a resolving_input field
+    // where we enter either an email for root accounts or a 12 digit account
+    // number for IAM accounts. The only way to differentiate them is using the
+    // placeholder value of the field.
+    var input = document.querySelector("input[id=resolving_input]");
+
+    if(input) {
+      if(input.placeholder === "") {
+        // If placeholder is empty, the form expects the account 12 digit id.
+        writeValueWithEvents(input, creds["account"]);
+      } else {
+        // If placeholder is not empty, the form expects a root user email.
+        writeValueWithEvents(input, creds["pass__user"]);
+      }
+    }
+
+    var userInput = document.querySelector("input[id=username]");
+
+    if(userInput) {
+      writeValueWithEvents(userInput, creds["pass__user"]);
+    }
+
+    var passInput = document.querySelector("input[type=password]");
+
+    if(passInput) {
+      writeValueWithEvents(passInput, creds["pass__password"]);
+    }
+
+  } else if(document.baseURI.includes("idmsa.apple.com")) {
 
     var userInput = document.querySelector("#account_name_text_field");
 
@@ -112,7 +137,10 @@ function fillForm(creds) {
       writeValueWithEvents(passwordInput, creds["pass__password"]);
       focus(passwordInput);
     }
+  } else {
+    fillDefaultForm(creds["pass__user"], creds["pass__password"])
   }
+
 
   for(const [key, value] of Object.entries(creds)) {
     var input = document.querySelector("input[name=" + key + "]");
