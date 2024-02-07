@@ -2,11 +2,13 @@
 
 # Requires python-gpg library
 import os
+import re
 import sys
 import json
 import struct
 import shutil
 import difflib
+import pathlib
 from urllib.parse import urlparse
 from collections import OrderedDict
 import gnupg
@@ -82,18 +84,40 @@ def get_url(path):
     return os.path.basename(os.path.normpath(path))
 
 
-# Returns the pass password for the specified path. The path must corresponde
-# to a unique existing gpg file inside the password store.
-def get_pass(path):
-    password = ""
-    gpg = gnupg.GPG(use_agent=True, gpgbinary=get_gpg_bin())
-    txt = open(get_store_path() + "/" + path + ".gpg", "rb")
-    data = gpg.decrypt_file(txt)
-    if data.ok:
-        password = data.data.decode('utf-8').split("\n")[0]
-        return password
+# Decrypt and read pass file data.
+def read_data(path):
+    with open(get_store_path() + "/" + path + ".gpg", "rb") as txt:
+        gpg = gnupg.GPG(use_agent=True, gpgbinary=get_gpg_bin())
+        decrypted = gpg.decrypt_file(txt)
+        if decrypted.ok:
+            return decrypted.data
 
-    raise RuntimeError("Failed to decrypt %s" % txt)
+    raise RuntimeError(f'Failed to decrypt {txt}')
+
+
+# Returns a dictionary with id and value pairs read from pass files that match
+# pattern:
+#
+#   key=value
+#
+# key only matches alphanumeric characters and cannot have spaces.
+def get_creds(path):
+    # Read decripted pass file data.
+    data = read_data(path).decode('utf-8').split("\n")
+
+    # Filter creds
+    reg = re.compile(r'^\w*=.*$')
+    filtered = list(filter(reg.search, data))
+
+    # Convert to dictionary
+    creds = dict(s.split("=") for s in filtered)
+
+    # Add default username and password.
+    # Use non-standard key names to avoid conflicts with page DOM ids.
+    creds["pass__user"] = pathlib.PurePath(path).name
+    creds["pass__password"] = data[0]
+
+    return creds
 
 
 # Sends the response message with the format that chrome HostNativeApplications
@@ -126,12 +150,11 @@ def process_native():
                 "url": pattern
             })
         elif action == "get-pass":
-            user = request["user"]
             path = request["path"]
+            creds = get_creds(path)
             send_message({
                 "action": "fill-pass",
-                "user": user,
-                "pass": get_pass(path)
+                "creds": creds
             })
     except RuntimeError as e:
         send_message({"action": "error", "msg": str(e)})
@@ -140,23 +163,16 @@ def process_native():
 
 
 # Method prints to stdout the list of passwords ordered by a similarty pattern
-def print_pass(pattern):
+def print_list(pattern):
+    for credential in get_list(pattern)[:20]:
+        print(credential)
+
+
+# Method prints to stdout the first match creds data.
+def print_creds(pattern):
     for credential in get_list(pattern)[:20]:
         account = credential[0] + "/" + credential[2]
-        try:
-            password = get_pass(account)
-            print("pass %s  %s" % (account, password))
-        except RuntimeError as e:
-            print("pass %s  %s" % (account, str(e)))
-
-
-# Method prints to stdout the list of credentials ordered by a similarity to
-# pattern.
-def print_creds(pattern):
-    for credential in get_list(pattern):
-        score = similarity(credential[1], pattern)
-        print("compare %s and %s score %.4f" %
-              (credential[1], credential[3], score))
+        print(f'{get_creds(account)}')
 
 
 # Determines the path were the native app manifest should be installed.
@@ -202,23 +218,23 @@ def native_path_brave():
 
 
 # Installs the Native Host Application manifest for this script into Chrome.
-def install(nativePath, extension_id):
+def install(native_path, extension_id):
     if sys.platform == "win32":
-        # Appends APPDATA to nativePath and set this path as a registry value
-        reg_key = os.path.join("Software", nativePath)
-        nativePath = os.path.join(os.environ['APPDATA'], nativePath)
-        outfile = os.path.join(nativePath, EXTENSION_NAME + '.json')
+        # Appends APPDATA to native_path and set this path as a registry value
+        reg_key = os.path.join("Software", native_path)
+        native_path = os.path.join(os.environ['APPDATA'], native_path)
+        outfile = os.path.join(native_path, EXTENSION_NAME + '.json')
         winreg.SetValue(winreg.HKEY_CURRENT_USER, reg_key, winreg.REG_SZ,
                         outfile)
 
-    if not os.path.exists(nativePath):
-        os.makedirs(nativePath)
+    if not os.path.exists(native_path):
+        os.makedirs(native_path)
 
     if sys.platform == "win32":
         batch = "python \"{}\" %*".format(os.path.realpath(__file__))
         native_app = EXTENSION_NAME + '.bat'
-        outfile = os.path.join(nativePath, native_app)
-        with open(outfile, 'w') as file:
+        outfile = os.path.join(native_path, native_app)
+        with open(outfile, 'w', encoding="utf-8") as file:
             file.write("@echo off\n\n")
             file.write(batch)
     else:
@@ -231,9 +247,9 @@ def install(nativePath, extension_id):
     manifest["type"] = "stdio"
     manifest["allowed_origins"] = ["chrome-extension://" + extension_id + "/"]
 
-    outfile = os.path.join(nativePath, manifest['name'] + '.json')
+    outfile = os.path.join(native_path, manifest['name'] + '.json')
 
-    with open(outfile, 'w') as file:
+    with open(outfile, 'w', encoding="utf-8") as file:
         json.dump(manifest, file, indent='\t')
 
 
@@ -251,8 +267,8 @@ if len(sys.argv) > 1:
             install(native_path_brave(), EXTENSION_ID)
     elif sys.argv[1] == "pass":
         if len(sys.argv) > 2:
-            print_pass(sys.argv[2])
+            print_creds(sys.argv[2])
     elif sys.argv[1] == "gpgbin":
-        print("GPG Binary path: %s" % get_gpg_bin())
+        print(f"GPG Binary path: {get_gpg_bin()}")
     else:
-        print_creds(sys.argv[1])
+        print_list(sys.argv[1])

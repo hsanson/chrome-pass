@@ -48,6 +48,8 @@ function writeValueWithEvents(input, value) {
   }
 }
 
+// Uses heuristics to try figuring out the login form password and
+// username/email input fields.
 function fillDefaultForm(user, pass) {
 
   var passInputs = document.querySelectorAll("input[type=password]");
@@ -61,77 +63,17 @@ function fillDefaultForm(user, pass) {
     if(formElement && (seenForms.indexOf(formElement) == -1)) {
       var userInput = formElement.querySelector("input[type=text], input[type=email], input:not([type])");
 
-      if(userInput && passInput) {
+      if(userInput) {
         writeValueWithEvents(userInput, user);
+      }
+
+      if(passInput) {
         writeValueWithEvents(passInput, pass);
         focus(passInput);
       }
     }
 
     seenForms.push(formElement);
-  }
-}
-
-function fillAppleDeveloperForms(user, pass) {
-
-  var userInput = document.querySelector("#account_name_text_field");
-
-  if(userInput) {
-    userInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-}
-
-function fillAmazonLoginForm(user, pass) {
-
-  var emailInput = document.querySelector("input[type=email]");
-
-  if(emailInput) {
-    emailInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-}
-
-function fillAwsLoginForm(path, user, pass) {
-
-  // Special input for AWS root login
-  var resolvingInput = document.querySelector("input[id=resolving_input]");
-
-  if(resolvingInput) {
-    resolvingInput.value = user;
-  }
-
-  var nameInput = document.querySelector("input[name=username]");
-
-  if(nameInput) {
-    nameInput.value = user;
-  }
-
-  var passwordInput = document.querySelector("input[type=password]");
-
-  if(passwordInput) {
-    passwordInput.value = pass;
-    focus(passwordInput);
-  }
-
-  // Account input box for IAM login
-  var accountInput = document.querySelector("input[name=account]");
-
-  if(accountInput) {
-    accountInput.value = path.split(/[\\/]/).pop()
-      .replace(/.?signin.aws.amazon.com/,"");
   }
 }
 
@@ -147,27 +89,72 @@ function copyToClipboard(txt) {
   document.body.removeChild(input);
 }
 
-// Heavy work function that finds login forms and fills them with the
-// credentials.
-function fillForm(path, user, pass) {
+function fillForm(creds) {
 
-  copyToClipboard(pass);
-
+  // AWS signin forms has two text inputs for username and account. Here we
+  // specifically fill username.
   if(document.baseURI.includes("signin.aws.amazon.com")) {
-     fillAwsLoginForm(path, user, pass);
-  } else if(document.baseURI.includes("amazon")) {
-     fillAmazonLoginForm(user, pass);
+
+    // First page asking for root or IAM account has a resolving_input field
+    // where we enter either an email for root accounts or a 12 digit account
+    // number for IAM accounts. The only way to differentiate them is using the
+    // placeholder value of the field.
+    var input = document.querySelector("input[id=resolving_input]");
+
+    if(input) {
+      if(input.placeholder === "") {
+        // If placeholder is empty, the form expects the account 12 digit id.
+        writeValueWithEvents(input, creds["account"]);
+      } else {
+        // If placeholder is not empty, the form expects a root user email.
+        writeValueWithEvents(input, creds["pass__user"]);
+      }
+    }
+
+    var userInput = document.querySelector("input[id=username]");
+
+    if(userInput) {
+      writeValueWithEvents(userInput, creds["pass__user"]);
+    }
+
+    var passInput = document.querySelector("input[type=password]");
+
+    if(passInput) {
+      writeValueWithEvents(passInput, creds["pass__password"]);
+    }
+
   } else if(document.baseURI.includes("idmsa.apple.com")) {
-     fillAppleDeveloperForms(user, pass);
+
+    var userInput = document.querySelector("#account_name_text_field");
+
+    if(userInput) {
+      writeValueWithEvents(userInput, creds["pass__user"]);
+    }
+
+    var passwordInput = document.querySelector("input[type=password]");
+
+    if(passwordInput) {
+      writeValueWithEvents(passwordInput, creds["pass__password"]);
+      focus(passwordInput);
+    }
   } else {
-    fillDefaultForm(user, pass);
+    fillDefaultForm(creds["pass__user"], creds["pass__password"])
+  }
+
+
+  for(const [key, value] of Object.entries(creds)) {
+    var input = document.querySelector("input[name=" + key + "]");
+
+    if(input != null) {
+      writeValueWithEvents(input, value);
+    }
   }
 }
 
 chrome.runtime.onMessage.addListener(function(msg) {
   switch(msg.action) {
     case "fill-pass":
-      fillForm(msg.path, msg.user, msg.pass);
+      fillForm(msg.creds);
       break;
     case "native-app-error":
       console.log("chrome-pass: error " + response.msg);

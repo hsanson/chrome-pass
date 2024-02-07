@@ -1,5 +1,13 @@
 = Changelog
 
+== v0.4.0
+
+*Improvements*
+
+* Migrate manifest to v3.
+* Re-work special handling for AWS IAM login.
+* Add support for custom DOM/value pairs that are filled in the login forms.
+
 == v0.3.0
 
 *Improvements*
