@@ -25,12 +25,12 @@ chromium browser and the python native application (nativePass).
 
 ## Quick Installation
 
-These instructions have been tested in Ubuntu 16.04 and later:
+These instructions have been tested in Ubuntu 22.04 and later:
 
 ### Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.3.0
+    pip3 install --user chrome-pass==0.4.0
     nativePass install
 
 ### Chrome extension install
@@ -78,6 +78,38 @@ Your paths can have as many parts as you want as long as the last two follow the
 above structure. And the [Service URL] part must match the URL of the page you
 are viewing because it is used to select the corresponding password from the
 store.
+
+### IAM Accounts
+
+For IAM accounts we need not only the login user and password but also the
+account 12 digit ID or alias. For this accounts chrom-pass has some special
+logic to be able to fill all information in the login page.
+
+    Password Store
+    ├── signin.aws.amazon.com
+    │   ├── my_root@email.com 
+    │   ├── my_other_root@gmail.com
+    │   ├── 183413992345
+    │   ├── 550312930456-username1
+    │   ├── 550312930456-username2
+    │   └── accountalias
+
+1. The [Service URL] must be `signin.aws.amazon.com` that is the URL for login into
+the console.
+2. For root accounts the [Account] can be the root account email used for login.
+3. For IAM accounts the [Account] can be anything that uniquely identifies the
+   credentials. For example the account 12 digit ID, or the account alias, or a
+   combination of the account 12 digi ID and the IAM username.
+4. For IAM accounts is necessary to edit the password GPG file using `pass edit`
+   and add two key/value pairs: `username=[IAM username]` and `account=[12 digit
+   account id or alias]`. When filling AWS signin loging forms, chrome-pass uses
+   these key/value pairs to fill the username and account input fields.
+
+### Custom input fields
+
+Using the same logic for IAM accounts, chrome-pass looks for any key/value pairs
+in the pass gpg files and fills any input field with ID equal to the `key` with
+the corresponding `value`.
 
 ## Install from source
 

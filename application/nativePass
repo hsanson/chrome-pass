@@ -95,13 +95,12 @@ def read_data(path):
     raise RuntimeError(f'Failed to decrypt {txt}')
 
 
-# Returns the pass password for the specified path. The path must corresponde
-# to a unique existing gpg file inside the password store.
-def get_pass(path):
-    return read_data(path).decode('utf-8').split("\n", maxsplit=1)[0]
-
-
-# Returns a dictionary with id and value pairs read from pass files.
+# Returns a dictionary with id and value pairs read from pass files that match
+# pattern:
+#
+#   key=value
+#
+# key only matches alphanumeric characters and cannot have spaces.
 def get_creds(path):
     # Read decripted pass file data.
     data = read_data(path).decode('utf-8').split("\n")
@@ -114,7 +113,7 @@ def get_creds(path):
     creds = dict(s.split("=") for s in filtered)
 
     # Add default username and password.
-    # Use non-standard key names to avoid conflicts with page DOM.
+    # Use non-standard key names to avoid conflicts with page DOM ids.
     creds["pass__user"] = pathlib.PurePath(path).name
     creds["pass__password"] = data[0]
 
