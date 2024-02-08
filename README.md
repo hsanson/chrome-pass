@@ -12,7 +12,7 @@ There are two folders in this repository that contain:
      and password store.
 
 To use the extension you need to install the extension in your chrome or
-chromium browser and the python native application (nativePass).
+chromium browser and the python native application (chrome_pass).
 
 ## Requirements
 
@@ -32,8 +32,8 @@ These instructions have been tested in Ubuntu 22.04 and later:
 ### Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.4.0
-    nativePass install
+    pip install --user chrome-pass==0.5.0
+    chrome_pass install
 
 ### Chrome extension install
 
@@ -129,12 +129,14 @@ then load the path to the *extension* folder using the *Load unpacked extension*
 button. After the extension is loaded into Chrome take note of the *extension
 ID*.
 
-Next we need to install the *nativePass* wrapper script and install the Native
+Next we need to install the *chrome_pass* wrapper script and install the Native
 Host Application manifest:
 
     cd application
-    python3 setup.py install
-    nativePass install [extension ID]
+    pip install --upgrade setuptools build --user
+    python -m build
+    pip install . --user
+    chrome_pass install [extension ID]
 
 ## Usage
 
@@ -143,6 +145,26 @@ Host Application manifest:
 - Click the username you want to fill into the login form from the list.
   - You may type a search term in the search box to filter the list of usernames.
 - The form should be automatically filled with the username and corresponding password.
+
+## Version 0.5.0 Notes
+
+The `nativePass` script has been renamed to `chrome_pass`.
+
+Version 0.5.0 of chrome-pass uses setuptools instead of distutils to package and
+install the native application. When installing you may get errors such as:
+
+```
+ERROR: Cannot uninstall 'chrome-pass'. It is a distutils installed project and
+thus we cannot accurately determine which files belong to it which would lead
+to only a partial uninstall.
+```
+
+In this situation is necessary to manually uninstall older versions of the package:
+
+1. Remove `nativePass` script. Find it using `which nativePass`.
+2. Find where site-packages are installed (e.g.
+   /var/lib/python3.10/site-packages) and remove all `chrome_pass-0.X.0...`
+   files and directories.
 
 ## Troubleshooting
 
@@ -157,21 +179,21 @@ your password store the most probable reasons are:
  passwords and username list. This file is usually located at
  ~/.config/google-chrome/NativeMessagingHosts folder and MUST be named
  *com.piaotech.chrome.extension.pass.json*.
-- The nativePass script has a helper method to generate the native host
- manifest *nativePass install [extension id]* so use it to generate the
+- The chrome_pass script has a helper method to generate the native host
+ manifest *chrome_pass install [extension id]* so use it to generate the
  manifest. If you do not give it am [extension id] it will generate the
  manifest with the id of the extension from the chrome web store.
 - Another possible issue is that the manifest contents does not match your
   system:
   - Ensure the *path* contains the absolute path to the location of the
-    nativePass wrapper script.
+    chrome_pass wrapper script.
   - Ensure the *allowed_origins* contains the URI with the exact extension ID
     installed in Chrome. To get the extension ID simply browse chrome:
     //extensions and look for the ID of the chrome-pass extension installed.
 
 ## Note about python-gnupg
 
-It has been found that the nativePass application is unable to decrypt the gpg
+It has been found that the chrome_pass application is unable to decrypt the gpg
 passwords with some newer versions of python-gnupg. I can verify that the plugin
 works without issues when using gnupg module version 0.3.9 found by default in
 Ubuntu 16.04LTS.

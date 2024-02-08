@@ -1,6 +1,7 @@
-#!/usr/bin/env python3
+"""
+chrome_pass native application module
+"""
 
-# Requires python-gpg library
 import os
 import re
 import sys
@@ -9,18 +10,20 @@ import struct
 import shutil
 import difflib
 import pathlib
+import posixpath
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 from collections import OrderedDict
+from importlib.metadata import entry_points
 import pyotp
 import gnupg
 
 if sys.platform == "win32":
     # Interacts with windows registry to register this app
-    import winreg
+    import winreg  # pylint: disable=import-error
     # On Windows, the default I/O mode is O_TEXT. Set this to O_BINARY
     # to avoid unwanted modifications of the input/output streams.
-    import msvcrt
+    import msvcrt  # pylint: disable=import-error
     msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
     msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
@@ -97,13 +100,16 @@ def read_data(path):
     raise RuntimeError(f'Failed to decrypt {txt}')
 
 
-# Returns a dictionary with id and value pairs read from pass files that match
-# pattern:
-#
-#   key=value
-#
-# key only matches alphanumeric characters and cannot have spaces.
 def get_creds(path):
+    """
+    Returns a dictionary with id and value pairs read from pass files
+    that match pattern:
+
+      key=value
+
+    key only matches alphanumeric characters and cannot have spaces.
+    """
+
     # Read decripted pass file data.
     data = read_data(path).decode('utf-8').split("\n")
 
@@ -131,17 +137,22 @@ def get_creds(path):
     return creds
 
 
-# Sends the response message with the format that chrome HostNativeApplications
-# expect.
 def send_message(message):
+    """
+    Sends response messages in format compatible with chrome
+    HostNativeApplications.
+    """
     response = json.dumps(message).encode('utf-8')
     sys.stdout.buffer.write(struct.pack('I', len(response)))
     sys.stdout.buffer.write(response)
     sys.stdout.buffer.flush()
 
 
-# Method that implements Chrome Native App protocol for messaging.
 def process_native():
+    """
+    Method that implements Chrome Native App protocol to enable
+    communication between chrome-pass chrome extension and pass.
+    """
     size = sys.stdin.buffer.read(4)
 
     if not size:
@@ -173,21 +184,28 @@ def process_native():
         send_message({"action": "error", "msg": sys.exc_info()[0]})
 
 
-# Method prints to stdout the list of passwords ordered by a similarty pattern
 def print_list(pattern):
+    """
+    Method prints to stdout the list of passwords ordered by a similarty
+    pattern
+    """
     for credential in get_list(pattern)[:20]:
         print(credential)
 
 
-# Method prints to stdout the first match creds data.
 def print_creds(pattern):
+    """
+    Method prints to stdout the first match creds data.
+    """
     for credential in get_list(pattern)[:20]:
         account = credential[0] + "/" + credential[2]
         print(f'{get_creds(account)}')
 
 
-# Determines the path were the native app manifest should be installed.
 def native_path_chrome():
+    """
+    Determines the path were the native app manifest should be installed.
+    """
     if sys.platform == "darwin":
         return os.path.expanduser(
             '~'
@@ -228,8 +246,23 @@ def native_path_brave():
     sys.exit(1)
 
 
-# Installs the Native Host Application manifest for this script into Chrome.
+def find_chrome_pass_path():
+    """
+    Convoluted function to figure out the absolute path of the chrome_pass
+    console script.
+    """
+    entry_point = entry_points().select(
+            name='chrome_pass', group='console_scripts')[0]
+    package_path = list(filter(
+        lambda file: file.name == "chrome_pass",
+        entry_point.dist.files))[0]
+    return posixpath.abspath(package_path.locate())
+
+
 def install(native_path, extension_id):
+    """
+    Installs the Native Host Application manifest for this script into Chrome.
+    """
     if sys.platform == "win32":
         # Appends APPDATA to native_path and set this path as a registry value
         reg_key = os.path.join("Software", native_path)
@@ -242,14 +275,14 @@ def install(native_path, extension_id):
         os.makedirs(native_path)
 
     if sys.platform == "win32":
-        batch = "python \"{}\" %*".format(os.path.realpath(__file__))
+        batch = f"python \"{os.path.realpath(__file__)}\" %*"
         native_app = EXTENSION_NAME + '.bat'
         outfile = os.path.join(native_path, native_app)
         with open(outfile, 'w', encoding="utf-8") as file:
             file.write("@echo off\n\n")
             file.write(batch)
     else:
-        native_app = os.path.realpath(__file__)
+        native_app = find_chrome_pass_path()
 
     manifest = OrderedDict()
     manifest['name'] = EXTENSION_NAME
@@ -264,22 +297,23 @@ def install(native_path, extension_id):
         json.dump(manifest, file, indent='\t')
 
 
-if len(sys.argv) > 1:
-    if sys.argv[1].startswith('chrome-extension://'):
-        process_native()
-    elif sys.argv[1] == "install":
-        if len(sys.argv) > 2:
-            install(native_path_chrome(), sys.argv[2])
-            install(native_path_chromium(), sys.argv[2])
-            install(native_path_brave(), sys.argv[2])
+def run():
+    if len(sys.argv) > 1:
+        if sys.argv[1].startswith('chrome-extension://'):
+            process_native()
+        elif sys.argv[1] == "install":
+            if len(sys.argv) > 2:
+                install(native_path_chrome(), sys.argv[2])
+                install(native_path_chromium(), sys.argv[2])
+                install(native_path_brave(), sys.argv[2])
+            else:
+                install(native_path_chrome(), EXTENSION_ID)
+                install(native_path_chromium(), EXTENSION_ID)
+                install(native_path_brave(), EXTENSION_ID)
+        elif sys.argv[1] == "pass":
+            if len(sys.argv) > 2:
+                print_creds(sys.argv[2])
+        elif sys.argv[1] == "gpgbin":
+            print(f"GPG Binary path: {get_gpg_bin()}")
         else:
-            install(native_path_chrome(), EXTENSION_ID)
-            install(native_path_chromium(), EXTENSION_ID)
-            install(native_path_brave(), EXTENSION_ID)
-    elif sys.argv[1] == "pass":
-        if len(sys.argv) > 2:
-            print_creds(sys.argv[2])
-    elif sys.argv[1] == "gpgbin":
-        print(f"GPG Binary path: {get_gpg_bin()}")
-    else:
-        print_list(sys.argv[1])
+            print_list(sys.argv[1])

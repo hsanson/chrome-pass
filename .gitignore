@@ -2,3 +2,4 @@ application/MANIFEST
 application/dist/*
 application/build/*
 extension.zip
+chrome_pass.egg-info

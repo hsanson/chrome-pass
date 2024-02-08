@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "chrome_pass"
+version = "0.5.0"
+authors = [
+  {name = "Horacio Sanson", email = "hsanson@gmail.com"},
+]
+description = "Native application for chrome-pass extension"
+requires-python = ">=3.8"
+keywords = ["pass", "chrome"]
+license = {text = "MIT"}
+dependencies = [
+  "python-gnupg",
+  "pyotp"
+]
+[project.scripts]
+chrome_pass = "chrome_pass:run"
