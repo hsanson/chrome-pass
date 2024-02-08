@@ -59,7 +59,7 @@ symbolic link to work around this limitation.
 
 This plugin assumes that the last two parts of each password path follows this structure:
 
-    [Service URL]/[Account]
+    [Service URL]/[Username]
 
 For example to keep some Gmail and Amazon accounts:
 
@@ -103,21 +103,41 @@ logic to be able to fill all information in the login page.
     │   └── accountalias
 
 1. The [Service URL] must be `signin.aws.amazon.com` that is the URL for login into
-the console.
+   the console.
 2. For root accounts the [Account] can be the root account email used for login.
 3. For IAM accounts the [Account] can be anything that uniquely identifies the
    credentials. For example the account 12-digit ID, or the account alias, or a
    combination of the account 12-digit ID and the IAM username.
-4. For IAM accounts it is necessary to edit the password GPG file using `pass edit`
-   and add two key/value pairs: `username=[IAM username]` and `account=[12 digit
-   account id or alias]`. When filling AWS login forms, chrome-pass uses
-   these key/value pairs to fill the username and account input fields.
+4. For IAM accounts edit the password GPG file using `pass edit ...` and add two
+   key/value pairs:
+   - `username=[IAM username]`
+   - `account=[12 digit AWS account id or alias]`
 
 ### Custom input fields
 
-Using the same feature for IAM accounts, chrome-pass looks for any key/value pairs
-in the pass gpg files and fills any input field with ID equal to the `key` with
-the corresponding `value`.
+The chrome-pass extension looks for any key/value pairs in the pass gpg files
+and fills any input field with ID equal to the `key` with the corresponding
+`value`.
+
+In addition if the `value` is set to the following placeholder values they are
+replaced:
+
+- `pass__user`: Replaced with the `[Username]` extracted from the last part of
+  the pass path.
+- `pass__password`: Replaced with the decrypted pass password.
+- `otpauth`: Replaced with the pass-otp code if available.
+
+This allows chrome-pass to work with some non-standard login forms like the
+[Apple Id](https://appleid.apple.com/sign-in) login form. This login page lacks
+a form element and relies in javascript to work. Fortunatelly the username and
+password input fields have well defined IDs that we can set in the chrome-pass
+file to let it work:
+
+```
+# chrome-pass for Apple ID login from.
+account_name_text_field=pass__user
+password_text_field=pass__password
+```
 
 ## Install from source
 
