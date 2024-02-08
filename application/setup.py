@@ -1,6 +1,8 @@
 # Release
 #
 # pip3 install --user twine
+# Configure pypi API token in ~/.pypirc file.
+#    https://pypi.org/help/#apitoken
 # Update the version string below.
 # Build package with `python3 setup.py sdist`
 # Upload package with `twine upload dist/*`

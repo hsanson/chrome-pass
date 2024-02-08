@@ -52,9 +52,10 @@ function writeValueWithEvents(input, value) {
 function fillTOTP(code) {
 
   // Most services that require MFA have a form with a single numeric input.
-  var input = document.querySelector("input[type=text],input[inputmode=numeric]")
+  var numericInputs = document.querySelectorAll("input[inputmode=numeric]")
 
-  if(input) {
+  for(var i = 0; i < numericInputs.length; i++) {
+    var input = numericInputs[i];
     writeValueWithEvents(input, code);
   }
 }
