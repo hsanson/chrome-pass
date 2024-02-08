@@ -9,8 +9,10 @@ import struct
 import shutil
 import difflib
 import pathlib
+from urllib.parse import parse_qs
 from urllib.parse import urlparse
 from collections import OrderedDict
+import pyotp
 import gnupg
 
 if sys.platform == "win32":
@@ -116,6 +118,15 @@ def get_creds(path):
     # Use non-standard key names to avoid conflicts with page DOM ids.
     creds["pass__user"] = pathlib.PurePath(path).name
     creds["pass__password"] = data[0]
+
+    # Extract OTPT secret if any
+    reg = re.compile(r'^otpauth://totp/.*$')
+    otpt = list(filter(reg.search, data))
+
+    if len(otpt) > 0:
+        secret = parse_qs(urlparse(otpt[0]).query)["secret"][0]
+        code = pyotp.TOTP(secret).now()
+        creds["otpauth"] = code
 
     return creds
 

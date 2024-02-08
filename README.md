@@ -16,12 +16,14 @@ chromium browser and the python native application (nativePass).
 
 ## Requirements
 
- 1. Chrome version 50 or later.
+ 1. Chrome version 107 or newer.
  2. Python 3+.
  3. pip 23.0 or newer
  4. [pass](https://www.passwordstore.org/) cli tool.
- 5. Running gpg-agent
- 6. A pinentry program configured.
+ 5. [pass-otp](https://github.com/tadfisher/pass-otp) (optional for TOTP MFA
+    support).
+ 6. Running gpg-agent
+ 7. A pinentry program configured.
 
 ## Quick Installation
 
@@ -79,10 +81,16 @@ above structure. And the [Service URL] part must match the URL of the page you
 are viewing because it is used to select the corresponding password from the
 store.
 
-### IAM Accounts
+### TOTP MFA Codes
+
+If the pass file has configured [pass-otp](https://github.com/tadfisher/pass-otp),
+then chrome-pass will generate the TOTP code and fill any numeric text inputs in
+the form with it.
+
+### AWS IAM Accounts
 
 For IAM accounts we need not only the login user and password but also the
-account 12 digit ID or alias. For this accounts chrom-pass has some special
+account 12 digit ID or alias. For these accounts, chrome-pass has some special
 logic to be able to fill all information in the login page.
 
     Password Store
@@ -98,16 +106,16 @@ logic to be able to fill all information in the login page.
 the console.
 2. For root accounts the [Account] can be the root account email used for login.
 3. For IAM accounts the [Account] can be anything that uniquely identifies the
-   credentials. For example the account 12 digit ID, or the account alias, or a
-   combination of the account 12 digi ID and the IAM username.
-4. For IAM accounts is necessary to edit the password GPG file using `pass edit`
+   credentials. For example the account 12-digit ID, or the account alias, or a
+   combination of the account 12-digit ID and the IAM username.
+4. For IAM accounts it is necessary to edit the password GPG file using `pass edit`
    and add two key/value pairs: `username=[IAM username]` and `account=[12 digit
-   account id or alias]`. When filling AWS signin loging forms, chrome-pass uses
+   account id or alias]`. When filling AWS login forms, chrome-pass uses
    these key/value pairs to fill the username and account input fields.
 
 ### Custom input fields
 
-Using the same logic for IAM accounts, chrome-pass looks for any key/value pairs
+Using the same feature for IAM accounts, chrome-pass looks for any key/value pairs
 in the pass gpg files and fills any input field with ID equal to the `key` with
 the corresponding `value`.
 
