@@ -48,6 +48,17 @@ function writeValueWithEvents(input, value) {
   }
 }
 
+// Fill MFA TOTP code
+function fillTOTP(code) {
+
+  // Most services that require MFA have a form with a single numeric input.
+  var input = document.querySelector("input[type=text],input[inputmode=numeric]")
+
+  if(input) {
+    writeValueWithEvents(input, code);
+  }
+}
+
 // Uses heuristics to try figuring out the login form password and
 // username/email input fields.
 function fillDefaultForm(user, pass) {
@@ -90,6 +101,11 @@ function copyToClipboard(txt) {
 }
 
 function fillForm(creds) {
+
+  // Try filling TOTP code.
+  if(creds["otpauth"]) {
+    fillTOTP(creds["otpauth"]);
+  }
 
   // AWS signin forms has two text inputs for username and account. Here we
   // specifically fill username.

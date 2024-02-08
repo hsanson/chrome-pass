@@ -23,13 +23,13 @@ class install_native_app(install):
 
 setup(
   name="chrome-pass",
-  version="0.3.0",
+  version="0.4.0",
   description="Chrome Native application for pass - the standard Unix password manager",
   url="https://github.com/hsanson/chrome-pass",
   author="Horacio Sanson",
   author_email="e@e.com",
   license="MIT",
-  install_requires=['python-gnupg'],
+  install_requires=['python-gnupg', 'pyotp'],
   scripts=["nativePass"],
   cmdclass={ 'install': install_native_app }
   )
