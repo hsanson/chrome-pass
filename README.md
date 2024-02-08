@@ -12,7 +12,7 @@ There are two folders in this repository that contain:
      and password store.
 
 To use the extension you need to install the extension in your chrome or
-chromium browser and the python native application (nativePass).
+chromium browser and the python native application (chrome_pass).
 
 ## Requirements
 
@@ -32,8 +32,8 @@ These instructions have been tested in Ubuntu 22.04 and later:
 ### Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip3 install --user chrome-pass==0.4.0
-    nativePass install
+    pip install --user chrome-pass==0.5.0
+    chrome_pass install
 
 ### Chrome extension install
 
@@ -59,7 +59,7 @@ symbolic link to work around this limitation.
 
 This plugin assumes that the last two parts of each password path follows this structure:
 
-    [Service URL]/[Account]
+    [Service URL]/[Username]
 
 For example to keep some Gmail and Amazon accounts:
 
@@ -103,21 +103,41 @@ logic to be able to fill all information in the login page.
     │   └── accountalias
 
 1. The [Service URL] must be `signin.aws.amazon.com` that is the URL for login into
-the console.
+   the console.
 2. For root accounts the [Account] can be the root account email used for login.
 3. For IAM accounts the [Account] can be anything that uniquely identifies the
    credentials. For example the account 12-digit ID, or the account alias, or a
    combination of the account 12-digit ID and the IAM username.
-4. For IAM accounts it is necessary to edit the password GPG file using `pass edit`
-   and add two key/value pairs: `username=[IAM username]` and `account=[12 digit
-   account id or alias]`. When filling AWS login forms, chrome-pass uses
-   these key/value pairs to fill the username and account input fields.
+4. For IAM accounts edit the password GPG file using `pass edit ...` and add two
+   key/value pairs:
+   - `username=[IAM username]`
+   - `account=[12 digit AWS account id or alias]`
 
 ### Custom input fields
 
-Using the same feature for IAM accounts, chrome-pass looks for any key/value pairs
-in the pass gpg files and fills any input field with ID equal to the `key` with
-the corresponding `value`.
+The chrome-pass extension looks for any key/value pairs in the pass gpg files
+and fills any input field with ID equal to the `key` with the corresponding
+`value`.
+
+In addition if the `value` is set to the following placeholder values they are
+replaced:
+
+- `pass__user`: Replaced with the `[Username]` extracted from the last part of
+  the pass path.
+- `pass__password`: Replaced with the decrypted pass password.
+- `otpauth`: Replaced with the pass-otp code if available.
+
+This allows chrome-pass to work with some non-standard login forms like the
+[Apple Id](https://appleid.apple.com/sign-in) login form. This login page lacks
+a form element and relies in javascript to work. Fortunatelly the username and
+password input fields have well defined IDs that we can set in the chrome-pass
+file to let it work:
+
+```
+# chrome-pass for Apple ID login from.
+account_name_text_field=pass__user
+password_text_field=pass__password
+```
 
 ## Install from source
 
@@ -129,12 +149,14 @@ then load the path to the *extension* folder using the *Load unpacked extension*
 button. After the extension is loaded into Chrome take note of the *extension
 ID*.
 
-Next we need to install the *nativePass* wrapper script and install the Native
+Next we need to install the *chrome_pass* wrapper script and install the Native
 Host Application manifest:
 
     cd application
-    python3 setup.py install
-    nativePass install [extension ID]
+    pip install --upgrade setuptools build --user
+    python -m build
+    pip install . --user
+    chrome_pass install [extension ID]
 
 ## Usage
 
@@ -143,6 +165,26 @@ Host Application manifest:
 - Click the username you want to fill into the login form from the list.
   - You may type a search term in the search box to filter the list of usernames.
 - The form should be automatically filled with the username and corresponding password.
+
+## Version 0.5.0 Notes
+
+The `nativePass` script has been renamed to `chrome_pass`.
+
+Version 0.5.0 of chrome-pass uses setuptools instead of distutils to package and
+install the native application. When installing you may get errors such as:
+
+```
+ERROR: Cannot uninstall 'chrome-pass'. It is a distutils installed project and
+thus we cannot accurately determine which files belong to it which would lead
+to only a partial uninstall.
+```
+
+In this situation is necessary to manually uninstall older versions of the package:
+
+1. Remove `nativePass` script. Find it using `which nativePass`.
+2. Find where site-packages are installed (e.g.
+   /var/lib/python3.10/site-packages) and remove all `chrome_pass-0.X.0...`
+   files and directories.
 
 ## Troubleshooting
 
@@ -157,21 +199,21 @@ your password store the most probable reasons are:
  passwords and username list. This file is usually located at
  ~/.config/google-chrome/NativeMessagingHosts folder and MUST be named
  *com.piaotech.chrome.extension.pass.json*.
-- The nativePass script has a helper method to generate the native host
- manifest *nativePass install [extension id]* so use it to generate the
+- The chrome_pass script has a helper method to generate the native host
+ manifest *chrome_pass install [extension id]* so use it to generate the
  manifest. If you do not give it am [extension id] it will generate the
  manifest with the id of the extension from the chrome web store.
 - Another possible issue is that the manifest contents does not match your
   system:
   - Ensure the *path* contains the absolute path to the location of the
-    nativePass wrapper script.
+    chrome_pass wrapper script.
   - Ensure the *allowed_origins* contains the URI with the exact extension ID
     installed in Chrome. To get the extension ID simply browse chrome:
     //extensions and look for the ID of the chrome-pass extension installed.
 
 ## Note about python-gnupg
 
-It has been found that the nativePass application is unable to decrypt the gpg
+It has been found that the chrome_pass application is unable to decrypt the gpg
 passwords with some newer versions of python-gnupg. I can verify that the plugin
 works without issues when using gnupg module version 0.3.9 found by default in
 Ubuntu 16.04LTS.

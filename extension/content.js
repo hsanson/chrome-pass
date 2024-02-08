@@ -51,6 +51,8 @@ function writeValueWithEvents(input, value) {
 // Fill MFA TOTP code
 function fillTOTP(code) {
 
+  if(!code) { return; }
+
   if(document.baseURI.includes("zoom.us")) {
     var zoomInput = document.querySelector("[class=form-masked-pin]");
 
@@ -111,10 +113,11 @@ function copyToClipboard(txt) {
 
 function fillForm(creds) {
 
-  // Try filling TOTP code.
-  if(creds["otpauth"]) {
-    fillTOTP(creds["otpauth"]);
-  }
+  const password = creds["pass__password"];
+  const username = creds["pass__user"];
+  const totp = creds["otpauth"];
+
+  fillTOTP(totp);
 
   // AWS signin forms has two text inputs for username and account. Here we
   // specifically fill username.
@@ -132,43 +135,39 @@ function fillForm(creds) {
         writeValueWithEvents(input, creds["account"]);
       } else {
         // If placeholder is not empty, the form expects a root user email.
-        writeValueWithEvents(input, creds["pass__user"]);
+        writeValueWithEvents(input, username);
       }
     }
 
     var userInput = document.querySelector("input[id=username]");
 
     if(userInput) {
-      writeValueWithEvents(userInput, creds["pass__user"]);
+      writeValueWithEvents(userInput, username);
     }
 
     var passInput = document.querySelector("input[type=password]");
 
     if(passInput) {
-      writeValueWithEvents(passInput, creds["pass__password"]);
-    }
-
-  } else if(document.baseURI.includes("idmsa.apple.com")) {
-
-    var userInput = document.querySelector("#account_name_text_field");
-
-    if(userInput) {
-      writeValueWithEvents(userInput, creds["pass__user"]);
-    }
-
-    var passwordInput = document.querySelector("input[type=password]");
-
-    if(passwordInput) {
-      writeValueWithEvents(passwordInput, creds["pass__password"]);
-      focus(passwordInput);
+      writeValueWithEvents(passInput, password);
     }
   } else {
-    fillDefaultForm(creds["pass__user"], creds["pass__password"])
+    fillDefaultForm(username, password);
   }
 
+  for(const [id, content] of Object.entries(creds)) {
 
-  for(const [key, value] of Object.entries(creds)) {
-    var input = document.querySelector("input[name=" + key + "]");
+    // Skip special keys.
+    if(["pass__password", "pass__user", "otpauth"].includes(id)) {
+      continue;
+    }
+
+    var input = document.querySelector("input[id=" + id + "]");
+    var value = content;
+
+    // Replace special values.
+    if(content == "pass__user") { value = username; }
+    if(content == "pass__password") { value = password; }
+    if(content == "otpauth") { value = totp; }
 
     if(input != null) {
       writeValueWithEvents(input, value);
