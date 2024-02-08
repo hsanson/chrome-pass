@@ -51,12 +51,20 @@ function writeValueWithEvents(input, value) {
 // Fill MFA TOTP code
 function fillTOTP(code) {
 
-  // Most services that require MFA have a form with a single numeric input.
-  var numericInputs = document.querySelectorAll("input[inputmode=numeric]")
+  if(document.baseURI.includes("zoom.us")) {
+    var zoomInput = document.querySelector("[class=form-masked-pin]");
 
-  for(var i = 0; i < numericInputs.length; i++) {
-    var input = numericInputs[i];
-    writeValueWithEvents(input, code);
+    if(zoomInput) {
+      writeValueWithEvents(zoomInput, code);
+    }
+  } else {
+    // Most services that require MFA have a form with a single numeric input.
+    var numericInputs = document.querySelectorAll("input[inputmode=numeric]")
+
+    for(var i = 0; i < numericInputs.length; i++) {
+      var input = numericInputs[i];
+      writeValueWithEvents(input, code);
+    }
   }
 }
 
