@@ -5,7 +5,7 @@ function hasClass(element, cls) {
 function fillLoginForm(select) {
   option = select.options[select.selectedIndex];
   chrome.runtime.sendMessage({
-    action: "get-pass",
+    action: "get-creds",
     root: option.getAttribute("data-root"),
     url: option.getAttribute("data-url"),
     user: option.value
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   chrome.runtime.onMessage.addListener(function(msg, sender, response) {
     switch(msg.action) {
-      case "fill-creds":
+      case "fill-list":
 
         var optGroups = {};
         var credentials = msg.credentials;
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     currentTab = tabs[0];
-    chrome.runtime.sendMessage({ action: "get-creds", url: currentTab.url });
+    chrome.runtime.sendMessage({ action: "get-list", url: currentTab.url });
   });
 
   search.addEventListener('keydown', function(e) {

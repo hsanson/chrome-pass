@@ -177,7 +177,7 @@ function fillForm(creds) {
 
 chrome.runtime.onMessage.addListener(function(msg) {
   switch(msg.action) {
-    case "fill-pass":
+    case "fill-creds":
       fillForm(msg.creds);
       break;
     case "native-app-error":

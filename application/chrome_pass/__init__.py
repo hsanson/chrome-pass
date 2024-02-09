@@ -164,18 +164,18 @@ def process_native():
         data = sys.stdin.buffer.read(length)
         request = json.loads(data.decode('utf-8'))
         action = request["action"]
-        if action == "get-creds":
+        if action == "get-list":
             pattern = urlparse(request["url"]).netloc
             send_message({
-                "action": "fill-creds",
+                "action": "fill-list",
                 "credentials": get_list(pattern),
                 "url": pattern
             })
-        elif action == "get-pass":
+        elif action == "get-creds":
             path = request["path"]
             creds = get_creds(path)
             send_message({
-                "action": "fill-pass",
+                "action": "fill-creds",
                 "creds": creds
             })
     except RuntimeError as e:
