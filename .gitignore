@@ -1,5 +1,6 @@
 application/MANIFEST
 application/dist/*
 application/build/*
+application/__pycache__/*
 extension.zip
 chrome_pass.egg-info

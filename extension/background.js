@@ -15,7 +15,7 @@ function getCredentials(url, tabId) {
   );
 }
 
-function getPass(root, url, user, tabId) {
+function getPass(root, user) {
   chrome.runtime.sendNativeMessage('com.piaotech.chrome.extension.pass',
       { action: "get-pass", user: user, path: root + "/" + user },
       function(response) {
@@ -23,7 +23,7 @@ function getPass(root, url, user, tabId) {
           if(response.action == "fill-pass") {
             chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
               var currentTab = tabs[0];
-              chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", path: root, user: user, pass: response.pass, creds: response.creds});
+              chrome.tabs.sendMessage(currentTab.id, { action: "fill-pass", creds: response.creds});
             });
             chrome.runtime.sendMessage({ action: "close-popup" });
           } else {
@@ -48,11 +48,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
       }
       return false;
     case "get-pass":
-      if(sender.tab) {
-        getPass(msg.root, msg.url, msg.user, sender.tab.id);
-      } else {
-        getPass(msg.root, msg.url, msg.user);
-      }
+      getPass(msg.root, msg.user);
       return false;
   }
 });

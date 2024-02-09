@@ -156,7 +156,7 @@ def process_native():
     size = sys.stdin.buffer.read(4)
 
     if not size:
-        send_message({"action": "error", "msg": "no data"})
+        send_message({"action": "native-app-error", "msg": "no data"})
         sys.exit()
 
     try:
@@ -179,9 +179,9 @@ def process_native():
                 "creds": creds
             })
     except RuntimeError as e:
-        send_message({"action": "error", "msg": str(e)})
+        send_message({"action": "native-app-error", "msg": str(e)})
     except Exception:
-        send_message({"action": "error", "msg": sys.exc_info()[0]})
+        send_message({"action": "native-app-error", "msg": sys.exc_info()[0]})
 
 
 def print_list(pattern):
