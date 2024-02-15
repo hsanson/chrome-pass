@@ -1,5 +1,11 @@
 = Changelog
 
+== v0.5.1 (Unreleased)
+
+*Changes*
+
+* Deprecate `otpoauth` custom input field with `pass__otpoauth` for consistency with the pass and username custom input fields.
+
 == v0.5.0
 
 *Changes*

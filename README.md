@@ -32,7 +32,7 @@ These instructions have been tested in Ubuntu 22.04 and later:
 ### Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip install --user chrome-pass==0.5.0
+    pip install --user chrome-pass==0.5.1
     chrome_pass install
 
 ### Chrome extension install
@@ -125,7 +125,7 @@ replaced:
 - `pass__user`: Replaced with the `[Username]` extracted from the last part of
   the pass path.
 - `pass__password`: Replaced with the decrypted pass password.
-- `otpauth`: Replaced with the pass-otp code if available.
+- `pass__otpauth`: Replaced with the pass-otp code if available.
 
 This allows chrome-pass to work with some non-standard login forms like the
 [Apple Id](https://appleid.apple.com/sign-in) login form. This login page lacks
@@ -165,6 +165,11 @@ Host Application manifest:
 - Click the username you want to fill into the login form from the list.
   - You may type a search term in the search box to filter the list of usernames.
 - The form should be automatically filled with the username and corresponding password.
+
+## Version 0.5.1 Notes
+
+Replace `otpoauth` custom fields with `pass__otpauth` in you pass files. The
+`otpoaut` custom field will be removed and won't work in future releases.
 
 ## Version 0.5.0 Notes
 

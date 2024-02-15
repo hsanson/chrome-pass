@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "chrome-pass (ZX2C4)",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Chrome plugin for *pass* the standard unix password manager.",
   "minimum_chrome_version": "107.0",
   "author": "Horacio Sanson",

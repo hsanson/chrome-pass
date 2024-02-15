@@ -115,7 +115,7 @@ function fillForm(creds) {
 
   const password = creds["pass__password"];
   const username = creds["pass__user"];
-  const totp = creds["otpauth"];
+  const totp = creds["pass__otpauth"];
 
   fillTOTP(totp);
 
@@ -167,6 +167,10 @@ function fillForm(creds) {
     // Replace special values.
     if(content == "pass__user") { value = username; }
     if(content == "pass__password") { value = password; }
+    if(content == "pass__otpauth") { value = totp; }
+
+    // Deprecated by pass__otpauth above but still left for
+    // backward compatibility.
     if(content == "otpauth") { value = totp; }
 
     if(input != null) {

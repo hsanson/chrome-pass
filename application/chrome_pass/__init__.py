@@ -132,7 +132,7 @@ def get_creds(path):
     if len(otpt) > 0:
         secret = parse_qs(urlparse(otpt[0]).query)["secret"][0]
         code = pyotp.TOTP(secret).now()
-        creds["otpauth"] = code
+        creds["pass__otpauth"] = code
 
     return creds
 
