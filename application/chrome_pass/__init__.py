@@ -251,12 +251,20 @@ def find_chrome_pass_path():
     Convoluted function to figure out the absolute path of the chrome_pass
     console script.
     """
-    entry_point = entry_points().select(
-            name='chrome_pass', group='console_scripts')[0]
+    entries = list(entry_points().select(
+            name='chrome_pass', group='console_scripts'))
+
+    if len(entries) <= 0:
+        return ""
+
     package_path = list(filter(
         lambda file: file.name == "chrome_pass",
-        entry_point.dist.files))[0]
-    return posixpath.abspath(package_path.locate())
+        entries[0].dist.files))
+
+    if len(package_path) <= 0:
+        return ""
+
+    return posixpath.abspath(package_path[0].locate())
 
 
 def install(native_path, extension_id):
