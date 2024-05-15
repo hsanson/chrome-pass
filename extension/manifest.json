@@ -20,6 +20,13 @@
     "default_title": "pass",
     "default_popup": "popup.html"
   },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+P"
+      }
+    }
+  },
   "content_scripts": [
     {
       "js": ["content.js"],
