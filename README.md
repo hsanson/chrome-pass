@@ -169,7 +169,10 @@ Host Application manifest:
 ## Version 0.5.1 Notes
 
 Replace `otpoauth` custom fields with `pass__otpauth` in you pass files. The
-`otpoaut` custom field will be removed and won't work in future releases.
+`otpoauth` custom field will be removed and won't work in future releases.
+
+Native application and extension 0.5.1 are not compatible with previous version.
+Ensure both are 0.5.1 for them to work properly.
 
 ## Version 0.5.0 Notes
 

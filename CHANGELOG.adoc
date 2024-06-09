@@ -6,6 +6,7 @@
 
 * Deprecate `otpoauth` custom input field with `pass__otpoauth` for consistency with the pass and username custom input fields.
 * Add `version` flag to chrome_pass command.
+* Fix install problem on some version of python (#36)
 
 == v0.5.0
 
