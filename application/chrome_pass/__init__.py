@@ -15,6 +15,7 @@ from urllib.parse import parse_qs
 from urllib.parse import urlparse
 from collections import OrderedDict
 from importlib.metadata import entry_points
+from importlib.metadata import version
 import pyotp
 import gnupg
 
@@ -309,6 +310,8 @@ def run():
     if len(sys.argv) > 1:
         if sys.argv[1].startswith('chrome-extension://'):
             process_native()
+        elif sys.argv[1] == "version":
+            print(f"Version: {version('chrome_pass')}")
         elif sys.argv[1] == "install":
             if len(sys.argv) > 2:
                 install(native_path_chrome(), sys.argv[2])
