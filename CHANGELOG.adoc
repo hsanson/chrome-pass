@@ -1,6 +1,13 @@
 = Changelog
 
-== v0.5.1 (Unreleased)
+== v1.0.0
+
+*Changes*
+
+* Add default hotkey `Alt+Shift+P` (by MarSoft)
+* First stable release.
+
+== v0.5.1
 
 *Changes*
 

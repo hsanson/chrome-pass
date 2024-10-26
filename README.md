@@ -32,7 +32,7 @@ These instructions have been tested in Ubuntu 22.04 and later:
 ### Python native pass application install
 
     sudo apt-get install pass python3 python3-pip
-    pip install --user chrome-pass==0.5.1
+    pip install --user chrome-pass==1.0.0
     chrome_pass install
 
 ### Chrome extension install

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "chrome_pass"
-version = "0.5.1"
+version = "1.0.0"
 authors = [
   {name = "Horacio Sanson", email = "hsanson@gmail.com"},
 ]
