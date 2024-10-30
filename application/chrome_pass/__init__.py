@@ -241,15 +241,6 @@ def native_path_chromium():
     sys.exit(1)
 
 
-def native_path_brave():
-    if sys.platform in ("linux", "linux2"):
-        return os.path.expanduser(
-           '~') + "/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/"
-
-    sys.stderr.write("Only linux is supported, patches welcome!!.")
-    sys.exit(1)
-
-
 def find_chrome_pass_path():
     """
     Convoluted function to figure out the absolute path of the chrome_pass
@@ -319,11 +310,9 @@ def run():
             if len(sys.argv) > 2:
                 install(native_path_chrome(), sys.argv[2])
                 install(native_path_chromium(), sys.argv[2])
-                install(native_path_brave(), sys.argv[2])
             else:
                 install(native_path_chrome(), EXTENSION_ID)
                 install(native_path_chromium(), EXTENSION_ID)
-                install(native_path_brave(), EXTENSION_ID)
         elif sys.argv[1] == "pass":
             if len(sys.argv) > 2:
                 print_creds(sys.argv[2])
