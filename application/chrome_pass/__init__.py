@@ -37,7 +37,12 @@ def get_gpg_bin():
         return os.environ['PASS_GPG_BIN']
     if shutil.which('gpg2'):
         return shutil.which('gpg2')
-    return shutil.which('gpg')
+    if shutil.which('gpg'):
+        return shutil.which('gpg')
+    if os.path.isfile("/opt/homebrew/bin/gpg"):
+        return "/opt/homebrew/bin/gpg"
+    else:
+        raise RuntimeException("Could not find gpg or gpg2 binary")
 
 
 def get_store_path():
@@ -179,10 +184,8 @@ def process_native():
                 "action": "fill-creds",
                 "creds": creds
             })
-    except RuntimeError as e:
+    except BaseException as e:
         send_message({"action": "native-app-error", "msg": str(e)})
-    except Exception:
-        send_message({"action": "native-app-error", "msg": sys.exc_info()[0]})
 
 
 def print_list(pattern):
