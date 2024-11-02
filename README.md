@@ -27,7 +27,7 @@ chromium browser and the python native application (chrome_pass).
 
 ## Quick Installation
 
-These instructions have been tested in Ubuntu 22.04 and later:
+These instructions have been tested in Ubuntu 24.04 and Debian 12 (bookworm):
 
 ### Python native pass application install
 
@@ -53,7 +53,8 @@ This extension assumes the password store is located inside the
     $HOME/.password-store
 
 In case you have the password store located somewhere else you may try using a
-symbolic link to work around this limitation.
+symbolic link to work around this limitation or set the `PASSWORD_STORE_DIR` env
+variable to point to the password store location.
 
 ### Password Paths
 
@@ -63,7 +64,7 @@ This plugin assumes that the last two parts of each password path follows this s
 
 For example to keep some Gmail and Amazon accounts:
 
-    Password Store
+    ~/.password-store/
     ├── mail.google.com
     │   ├── me@gmailcom 
     │   ├── you@gmail.com
@@ -109,28 +110,34 @@ logic to be able to fill all information in the login page.
    credentials. For example the account 12-digit ID, or the account alias, or a
    combination of the account 12-digit ID and the IAM username.
 4. For IAM accounts edit the password GPG file using `pass edit ...` and add two
-   key/value pairs:
+   key/value pairs anywhere after the password line:
    - `username=[IAM username]`
    - `account=[12 digit AWS account id or alias]`
+5. The chrome-pass extension will use the `username` to fill the username field,
+   the `account` to fill the account id field, and the decrypted `password` to
+   fill the password field.
 
 ### Custom input fields
 
 The chrome-pass extension looks for any key/value pairs in the pass gpg files
-and fills any input field with ID equal to the `key` with the corresponding
+and fills any HTML input field with ID equal to the `key` with the corresponding
 `value`.
 
-In addition if the `value` is set to the following placeholder values they are
-replaced:
+In addition, if the `value` is set to the following special placeholder values,
+they are replaced with:
 
 - `pass__user`: Replaced with the `[Username]` extracted from the last part of
   the pass path.
 - `pass__password`: Replaced with the decrypted pass password.
 - `pass__otpauth`: Replaced with the pass-otp code if available.
 
+> [!NOTE]
+> The special placeholder keys have double underscore `__` characters.
+
 This allows chrome-pass to work with some non-standard login forms like the
 [Apple Id](https://appleid.apple.com/sign-in) login form. This login page lacks
-a form element and relies in javascript to work. Fortunatelly the username and
-password input fields have well defined IDs that we can set in the chrome-pass
+a form element and relies in javascript to work. Fortunately, the username and
+password HTML input fields have well-defined IDs that we can set in the chrome-pass
 file to let it work:
 
 ```
@@ -139,12 +146,17 @@ account_name_text_field=pass__user
 password_text_field=pass__password
 ```
 
+Adding the above key/value pairs to the Apple account pass file will instruct
+the chrome-pass extension to fill any HTML input field with id
+`account_name_text_field` with the username and any HTML input field with id
+`password_text_field` with the decrypted password.
+
 ## Install from source
 
 This is for developers only or people that want to see the source code before
 trusting their passwords to some extension written by an unknown person.
 
-Inside Chrome open the url chrome://extensions, check the *Developer mode* and
+Inside Chrome open the URL chrome://extensions, check the *Developer mode* and
 then load the path to the *extension* folder using the *Load unpacked extension*
 button. After the extension is loaded into Chrome take note of the *extension
 ID*.
@@ -161,7 +173,7 @@ Host Application manifest:
 ## Usage
 
 - Open any web page with a login form.
-- Click the pass button in the Chrome tool bar.
+- Click the pass button in the Chrome toolbar.
 - Click the username you want to fill into the login form from the list.
   - You may type a search term in the search box to filter the list of usernames.
 - The form should be automatically filled with the username and corresponding password.
@@ -209,12 +221,12 @@ your password store the most probable reasons are:
  *com.piaotech.chrome.extension.pass.json*.
 - The chrome_pass script has a helper method to generate the native host
  manifest *chrome_pass install [extension id]* so use it to generate the
- manifest. If you do not give it am [extension id] it will generate the
+ manifest. If you do not give it an [extension id] it will generate the
  manifest with the id of the extension from the chrome web store.
 - Another possible issue is that the manifest contents does not match your
   system:
   - Ensure the *path* contains the absolute path to the location of the
-    chrome_pass wrapper script.
+    chrome_pass script.
   - Ensure the *allowed_origins* contains the URI with the exact extension ID
     installed in Chrome. To get the extension ID simply browse chrome:
     //extensions and look for the ID of the chrome-pass extension installed.
